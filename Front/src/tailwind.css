@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+@source './app';
+
+/* ---------------------------------------------------------------------------
+   Design tokens de UCAio (handoff "Claude design/README.md").
+   Cada token queda disponible como utilidad de Tailwind (bg-papel, text-plomo,
+   rounded-tarjeta) y como custom property para los SCSS de componente.
+
+   | token del handoff | aca            | hex     |
+   |-------------------|----------------|---------|
+   | surface-page      | lienzo         | #F9FAFB |
+   | surface-card      | papel          | #FFFFFF |
+   | border-default    | borde          | #E5E7EB |
+   | border-subtle     | borde-sutil    | #F3F4F6 |
+   | text-primary      | tinta          | #111827 |
+   | text-secondary    | grafito        | #374151 |
+   | text-muted        | plomo          | #6B7280 |
+   | text-faint        | humo           | #9CA3AF |
+   | accent            | acento         | #374151 |
+   | state-occupied    | ocupada        | #B45309 |
+   | state-low         | baja           | #A16207 |
+   | state-reserved    | reservada      | #94A3B8 |
+
+   El acento es intercambiable: cambiando `--color-acento` se retinta toda la
+   app (tabs y chips activos, boton primario y el punto de estado "Libre").
+--------------------------------------------------------------------------- */
+@theme {
+  --color-lienzo: #f9fafb;
+  --color-papel: #ffffff;
+  --color-borde: #e5e7eb;
+  --color-borde-sutil: #f3f4f6;
+  --color-tinta: #111827;
+  --color-grafito: #374151;
+  --color-plomo: #6b7280;
+  --color-humo: #9ca3af;
+  --color-acento: #374151;
+  --color-ocupada: #b45309;
+  --color-baja: #a16207;
+  --color-reservada: #94a3b8;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Radios del handoff: 8 botones/chips · 10 inputs y filas · 12 tarjetas. */
+  --radius-etiqueta: 0.375rem;
+  --radius-boton: 0.5rem;
+  --radius-control: 0.625rem;
+  --radius-tarjeta: 0.75rem;
+
+  /* Sin sombras en ningun elemento: la separacion es por borde de 1px. */
+}

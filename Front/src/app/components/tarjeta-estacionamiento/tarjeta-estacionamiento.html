@@ -1,0 +1,54 @@
+<ui-tarjeta>
+  <div class="flex flex-col gap-4 lg:gap-[18px]">
+    <!-- Nombre + tarifa -->
+    <div class="flex items-start justify-between gap-4">
+      <div class="min-w-0">
+        <h3 class="text-[16px] leading-tight font-semibold tracking-[-0.01em] text-tinta lg:text-[17px]">
+          {{ estacionamiento().nombre }}
+        </h3>
+        <p class="mt-1 text-[13px] leading-normal text-plomo">{{ ubicacion() }}</p>
+      </div>
+
+      <div class="shrink-0 text-right">
+        <p class="num-tabular text-[16px] font-semibold text-tinta lg:text-[17px]">
+          $ {{ tarifa() }}
+        </p>
+        <p class="mt-0.5 text-[11px] text-humo">por hora</p>
+      </div>
+    </div>
+
+    <div class="h-px bg-borde-sutil"></div>
+
+    <!-- Disponibilidad + horario (en desktop tambien el boton) -->
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-2">
+        <ui-punto-estado [tono]="tono()" />
+        <span class="truncate text-[12.5px] font-medium text-grafito">{{ disponibilidad() }}</span>
+      </div>
+
+      <div class="flex shrink-0 items-center gap-3.5">
+        <span class="num-tabular text-[12px] text-plomo">{{ horario() }}</span>
+        <div class="hidden lg:block">
+          <ui-boton
+            tamano="sm"
+            [deshabilitado]="libres() === 0"
+            (presionado)="reservar.emit(estacionamiento())"
+          >
+            Reservar
+          </ui-boton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile: boton de ancho completo -->
+    <div class="lg:hidden">
+      <ui-boton
+        [bloque]="true"
+        [deshabilitado]="libres() === 0"
+        (presionado)="reservar.emit(estacionamiento())"
+      >
+        Reservar
+      </ui-boton>
+    </div>
+  </div>
+</ui-tarjeta>

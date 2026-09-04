@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-2.5">
+  <div class="lg:w-[280px]">
+    <ui-campo-busqueda
+      [valor]="filtros().busqueda ?? ''"
+      (valorChange)="actualizar({ busqueda: $event })"
+    />
+  </div>
+
+  <div class="flex gap-2">
+    @for (tipo of tipos; track tipo) {
+      <ui-chip [activo]="filtros().tipoVehiculo === tipo" (alternar)="actualizar({ tipoVehiculo: tipo })">
+        {{ etiquetaTipo[tipo] }}
+      </ui-chip>
+    }
+  </div>
+</div>

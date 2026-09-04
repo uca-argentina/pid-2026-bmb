@@ -1,0 +1,31 @@
+@use 'mixins' as m;
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  input {
+    padding: 12px 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-control);
+    background: var(--color-papel);
+    color: var(--color-tinta);
+    font-size: 14px;
+
+    &::placeholder {
+      color: var(--color-humo);
+    }
+
+    &:focus {
+      border-color: var(--color-acento);
+      outline: none;
+    }
+
+    @include m.foco-visible(var(--color-acento));
+
+    &.ng-touched.ng-invalid {
+      border-color: var(--color-ocupada);
+    }
+  }
+}

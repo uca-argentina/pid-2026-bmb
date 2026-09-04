@@ -1,0 +1,28 @@
+<div class="flex min-h-dvh bg-lienzo">
+  <!-- Desktop: nav lateral fija -->
+  <div class="hidden lg:block">
+    <app-barra-lateral [items]="items()" [usuario]="usuario()" (salir)="salir()" />
+  </div>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <!-- Mobile: marca + salida, ocupa el lugar de la status bar del prototipo -->
+    <div class="flex items-center justify-between px-6 pt-3.5 lg:hidden">
+      <span class="text-[12px] font-semibold text-tinta">UCAio</span>
+      <button
+        type="button"
+        class="text-[12px] font-medium text-plomo transition-colors duration-140 ease-out"
+        (click)="salir()"
+      >
+        Salir
+      </button>
+    </div>
+
+    <main class="flex-1">
+      <router-outlet />
+    </main>
+
+    <div class="sticky bottom-0 lg:hidden">
+      <app-tabs-inferior [items]="items()" />
+    </div>
+  </div>
+</div>

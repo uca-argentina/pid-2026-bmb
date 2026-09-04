@@ -1,0 +1,20 @@
+<dl class="flex flex-col gap-4">
+  <div class="flex items-center justify-between gap-4">
+    <dt class="text-[13px] text-plomo">Duración</dt>
+    <dd class="num-tabular text-[13px] font-medium text-tinta">{{ duracion() }}</dd>
+  </div>
+
+  <div class="flex items-center justify-between gap-4">
+    <dt class="text-[13px] text-plomo">Cochera asignada</dt>
+    <dd class="text-[13px] font-medium text-tinta">{{ textoCochera() }}</dd>
+  </div>
+
+  <div class="h-px bg-borde-sutil"></div>
+
+  <div class="flex items-center justify-between gap-4">
+    <dt class="text-[13px] font-semibold text-tinta">Total</dt>
+    <dd class="num-tabular text-[22px] font-semibold tracking-[-0.02em] text-tinta">
+      $ {{ totalFormateado() }}
+    </dd>
+  </div>
+</dl>

@@ -1,0 +1,46 @@
+<aside class="flex h-full w-[238px] flex-col gap-7 border-r border-borde bg-papel px-[18px] py-[26px]">
+  <div class="px-2">
+    <p class="text-[16px] font-semibold text-tinta">UCAio</p>
+    <p class="mt-0.5 text-[11.5px] text-humo">Gestión de estacionamientos</p>
+  </div>
+
+  <nav>
+    <ul class="flex flex-col gap-1">
+      @for (item of items(); track item.ruta) {
+        <li>
+          <a
+            class="block rounded-boton px-3.5 py-[11px] text-left text-[13px] font-medium text-plomo
+                   transition-colors duration-140 ease-out hover:bg-borde-sutil"
+            [routerLink]="item.ruta"
+            routerLinkActive="bg-acento text-white font-semibold hover:bg-acento"
+          >
+            {{ item.etiqueta }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  @if (usuario(); as datos) {
+    <div class="mt-auto flex items-center gap-2.5 border-t border-borde-sutil px-2.5 pt-3">
+      <span
+        class="grid size-7 shrink-0 place-items-center rounded-full border border-borde
+               bg-borde-sutil text-[11px] font-semibold text-plomo"
+      >
+        {{ inicial() }}
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-[12.5px] font-medium text-tinta">{{ nombre() }}</p>
+        <p class="text-[11px] text-humo">{{ rol() }}</p>
+      </div>
+      <button
+        type="button"
+        class="rounded-boton px-2 py-1 text-[11px] font-medium text-plomo transition-colors
+               duration-140 ease-out hover:bg-borde-sutil hover:text-tinta"
+        (click)="salir.emit()"
+      >
+        Salir
+      </button>
+    </div>
+  }
+</aside>

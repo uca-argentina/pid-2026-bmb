@@ -1,0 +1,88 @@
+// Capa global. Los tokens y las utilidades vienen de Tailwind (src/tailwind.css).
+//
+// Todo va dentro de @layer: las reglas sin capa le ganan a cualquier utilidad de
+// Tailwind (que vive en @layer utilities), y eso rompia cosas como `text-white`
+// sobre un boton o un link de la nav activa.
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    background: var(--color-lienzo);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  // Eyebrow de seccion: 11px/600, mayusculas, tracking .12em.
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-plomo);
+  }
+
+  // Titulo de vista: 26px en mobile, 30px en desktop.
+  .titulo-vista {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--color-tinta);
+
+    @media (min-width: 1024px) {
+      font-size: 30px;
+    }
+  }
+
+  // Label de campo (12px/600).
+  .label-campo {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-tinta);
+  }
+
+  .num-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}

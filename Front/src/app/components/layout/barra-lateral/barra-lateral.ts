@@ -1,0 +1,36 @@
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Usuario, iniciales, nombreCorto } from '../../../models';
+import { ItemNavegacion } from '../navegacion.model';
+
+const ETIQUETA_ROL = { CONDUCTOR: 'Conductor', PROPIETARIO: 'Propietario' } as const;
+
+/** Nav lateral de 238px que reemplaza a la tab bar en >= 1024px. */
+@Component({
+  selector: 'app-barra-lateral',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, RouterLinkActive],
+  templateUrl: './barra-lateral.html',
+  host: { class: 'block h-full' },
+})
+export class BarraLateral {
+  readonly items = input.required<ItemNavegacion[]>();
+  readonly usuario = input<Usuario | null>(null);
+
+  readonly salir = output<void>();
+
+  protected readonly nombre = computed(() => {
+    const usuario = this.usuario();
+    return usuario ? nombreCorto(usuario) : '';
+  });
+
+  protected readonly inicial = computed(() => {
+    const usuario = this.usuario();
+    return usuario ? iniciales(usuario) : '';
+  });
+
+  protected readonly rol = computed(() => {
+    const usuario = this.usuario();
+    return usuario ? ETIQUETA_ROL[usuario.rol] : '';
+  });
+}

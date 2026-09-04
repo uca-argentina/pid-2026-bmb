@@ -1,0 +1,19 @@
+<div
+  class="grid grid-cols-5 gap-2.5 lg:justify-start lg:[grid-template-columns:repeat(5,minmax(0,88px))]"
+  role="radiogroup"
+  aria-label="Fecha"
+>
+  @for (dia of fechas(); track dia.iso) {
+    <button
+      type="button"
+      class="dia"
+      role="radio"
+      [class.dia--activo]="seleccionada() === dia.iso"
+      [attr.aria-checked]="seleccionada() === dia.iso"
+      (click)="seleccionada.set(dia.iso)"
+    >
+      <span class="dia__semana">{{ dia.fecha | date: 'EEE' }}</span>
+      <span class="num-tabular text-[16px] font-semibold">{{ dia.fecha | date: 'd' }}</span>
+    </button>
+  }
+</div>
