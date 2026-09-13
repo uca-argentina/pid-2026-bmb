@@ -1,8 +1,17 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { ETIQUETA_ESTADO_RESERVA, ReservaDetallada, esReservaActiva } from '../../models';
+import { ETIQUETA_ESTADO_RESERVA, EstadoReserva, ReservaDetallada, esReservaActiva } from '../../models';
 import { desdeFechaISO } from '../../utils/fecha.util';
-import { Boton, Etiqueta } from '../ui';
+import { Boton, Etiqueta, TonoEtiqueta } from '../ui';
+
+/** El color del badge adelanta el estado antes de leer la palabra. */
+const TONO_ESTADO: Record<EstadoReserva, TonoEtiqueta> = {
+  PENDIENTE: 'aviso',
+  CONFIRMADA: 'acento',
+  EN_CURSO: 'exito',
+  FINALIZADA: 'neutro',
+  CANCELADA: 'peligro',
+};
 
 /**
  * Fila de reserva dentro de una tarjeta con `overflow: hidden`.
@@ -14,7 +23,9 @@ import { Boton, Etiqueta } from '../ui';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, Etiqueta, Boton],
   templateUrl: './fila-reserva.html',
-  host: { class: 'block' },
+  // La fila lleva su divisor arriba. Cuando es la primera de la tarjeta ese
+  // divisor se solapa con el borde de la tarjeta, asi que se suprime.
+  host: { class: 'block first:[&>div]:border-t-0' },
 })
 export class FilaReserva {
   readonly reserva = input.required<ReservaDetallada>();
@@ -25,6 +36,7 @@ export class FilaReserva {
 
   protected readonly etiquetaEstado = ETIQUETA_ESTADO_RESERVA;
   protected readonly activa = computed(() => esReservaActiva(this.reserva()));
+  protected readonly tonoEstado = computed(() => TONO_ESTADO[this.reserva().estado]);
 
   protected readonly titulo = computed(() => {
     const reserva = this.reserva();

@@ -1,16 +1,23 @@
 <div class="flex min-h-dvh bg-lienzo">
   <!-- Desktop: nav lateral fija -->
-  <div class="hidden lg:block">
+  <div class="sticky top-0 hidden h-dvh lg:block">
     <app-barra-lateral [items]="items()" [usuario]="usuario()" (salir)="salir()" />
   </div>
 
   <div class="flex min-w-0 flex-1 flex-col">
     <!-- Mobile: marca + salida, ocupa el lugar de la status bar del prototipo -->
-    <div class="flex items-center justify-between px-6 pt-3.5 lg:hidden">
-      <span class="text-[12px] font-semibold text-tinta">UCAio</span>
+    <div
+      class="sticky top-0 z-10 flex items-center justify-between border-b border-borde-sutil
+             bg-lienzo/85 px-6 py-3 backdrop-blur-md lg:hidden"
+    >
+      <span class="flex items-center gap-2">
+        <span class="marca-logo !h-6 !w-6 !text-[11px]" aria-hidden="true">U</span>
+        <span class="text-[13px] font-semibold tracking-[-0.01em] text-tinta">UCAio</span>
+      </span>
       <button
         type="button"
-        class="text-[12px] font-medium text-plomo transition-colors duration-140 ease-out"
+        class="rounded-boton px-2 py-1 text-[12px] font-medium text-plomo transition-colors
+               duration-160 ease-out hover:bg-borde-sutil hover:text-tinta"
         (click)="salir()"
       >
         Salir
@@ -21,7 +28,7 @@
       <router-outlet />
     </main>
 
-    <div class="sticky bottom-0 lg:hidden">
+    <div class="sticky bottom-0 z-10 lg:hidden">
       <app-tabs-inferior [items]="items()" />
     </div>
   </div>

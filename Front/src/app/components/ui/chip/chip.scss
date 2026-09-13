@@ -1,9 +1,0 @@
-@use 'mixins' as m;
-
-:host {
-  display: contents;
-}
-
-button {
-  @include m.foco-visible;
-}

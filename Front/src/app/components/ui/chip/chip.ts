@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
       <ng-content />
     </button>
   `,
-  styleUrl: './chip.scss',
+  styleUrl: './chip.css',
 })
 export class Chip {
   readonly activo = input(false);
@@ -19,10 +19,10 @@ export class Chip {
   protected readonly clases = computed(() =>
     [
       'shrink-0 rounded-boton border px-3.5 py-[9px] text-[12.5px] font-medium whitespace-nowrap',
-      'transition-colors duration-140 ease-out',
+      'transition-[background-color,border-color,box-shadow,color] duration-160 ease-out',
       this.activo()
-        ? 'border-acento bg-acento text-white'
-        : 'border-borde bg-papel text-plomo hover:bg-borde-sutil',
+        ? 'border-acento bg-acento text-white shadow-elevada'
+        : 'border-borde bg-papel text-plomo shadow-tarjeta hover:border-acento-borde hover:bg-acento-suave hover:text-acento-fuerte',
     ].join(' '),
   );
 }

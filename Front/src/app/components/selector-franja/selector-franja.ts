@@ -16,7 +16,7 @@ export interface RangoHorario {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
   templateUrl: './selector-franja.html',
-  styleUrl: './selector-franja.scss',
+  styleUrl: './selector-franja.css',
   host: { class: 'block' },
 })
 export class SelectorFranja {

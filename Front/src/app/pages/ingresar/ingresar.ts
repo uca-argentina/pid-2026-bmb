@@ -12,7 +12,7 @@ import { AuthService } from '../../services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, Boton],
   templateUrl: './ingresar.html',
-  styleUrl: './ingresar.scss',
+  styleUrl: './ingresar.css',
 })
 export class Ingresar {
   private readonly auth = inject(AuthService);

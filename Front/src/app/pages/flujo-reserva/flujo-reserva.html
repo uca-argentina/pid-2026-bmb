@@ -9,9 +9,20 @@
     @if (reservaConfirmada(); as reserva) {
       <!-- Confirmacion -->
       <div class="flex flex-col gap-6">
-        <header>
-          <p class="eyebrow">Reserva confirmada</p>
-          <h1 class="titulo-vista mt-1.5">{{ estacionamiento.nombre }}</h1>
+        <header class="flex flex-col items-start gap-3">
+          <span
+            class="grid size-11 place-items-center rounded-full bg-exito-suave text-exito"
+            aria-hidden="true"
+          >
+            <svg class="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m5 10.5 3.4 3.4L15 7.3" />
+            </svg>
+          </span>
+          <div>
+            <p class="eyebrow text-exito">Reserva confirmada</p>
+            <h1 class="titulo-vista mt-1.5">{{ estacionamiento.nombre }}</h1>
+          </div>
         </header>
 
         <ui-tarjeta relleno="lg">
@@ -19,7 +30,7 @@
             <p class="text-[13px] text-plomo">
               Guardamos tu lugar el
               <span class="font-medium text-tinta">
-                {{ desdeFechaISO(reserva.fecha) | date: 'EEEE d [de] MMMM' }}</span
+                {{ desdeFechaISO(reserva.fecha) | date: "EEEE d 'de' MMMM" }}</span
               >, de
               <span class="num-tabular font-medium text-tinta"
                 >{{ reserva.horaDesde }} a {{ reserva.horaHasta }}</span
@@ -28,7 +39,7 @@
             <div class="h-px bg-borde-sutil"></div>
             <div class="flex items-center justify-between gap-4">
               <span class="text-[13px] text-plomo">Total</span>
-              <span class="num-tabular text-[22px] font-semibold tracking-[-0.02em] text-tinta">
+              <span class="num-tabular text-[22px] font-semibold tracking-[-0.02em] text-acento">
                 $ {{ reserva.precioTotal.toLocaleString('es-AR') }}
               </span>
             </div>
@@ -46,8 +57,8 @@
       <div class="flex flex-col gap-6">
         <header>
           <a
-            class="text-[12px] font-medium text-plomo transition-colors duration-140 ease-out
-                   hover:text-tinta"
+            class="inline-flex items-center gap-1.5 rounded-boton text-[12px] font-medium
+                   text-plomo transition-colors duration-160 ease-out hover:text-acento"
             routerLink="/conductor/explorar"
           >
             ← Volver
@@ -60,8 +71,8 @@
         <div class="grid gap-6 lg:grid-cols-[1.35fr_0.85fr] lg:items-start">
           <!-- Campos: sueltos en mobile, dentro de una tarjeta en desktop -->
           <div
-            class="flex flex-col gap-[26px] lg:rounded-tarjeta lg:border lg:border-borde
-                   lg:bg-papel lg:p-[26px]">
+            class="flex flex-col gap-[26px] rounded-tarjeta border border-borde bg-papel p-5
+                   shadow-tarjeta lg:p-[26px]">
               <div class="flex flex-col gap-3">
                 <p class="label-campo">Vehículo</p>
                 @if (recursoVehiculos.isLoading()) {
@@ -116,7 +127,7 @@
 
             @if (error(); as mensaje) {
               <p
-                class="rounded-control border border-ocupada/30 bg-papel px-4 py-3 text-[13px]
+                class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px]
                        text-ocupada"
                 role="alert"
               >

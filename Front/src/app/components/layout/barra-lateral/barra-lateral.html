@@ -1,7 +1,10 @@
 <aside class="flex h-full w-[238px] flex-col gap-7 border-r border-borde bg-papel px-[18px] py-[26px]">
   <div class="px-2">
-    <p class="text-[16px] font-semibold text-tinta">UCAio</p>
-    <p class="mt-0.5 text-[11.5px] text-humo">Gestión de estacionamientos</p>
+    <div class="flex items-center gap-2.5">
+      <span class="marca-logo" aria-hidden="true">U</span>
+      <p class="text-[16px] leading-none font-semibold tracking-[-0.01em] text-tinta">UCAio</p>
+    </div>
+    <p class="mt-2.5 text-[11.5px] leading-tight text-humo">Gestión de estacionamientos</p>
   </div>
 
   <nav>
@@ -10,9 +13,11 @@
         <li>
           <a
             class="block rounded-boton px-3.5 py-[11px] text-left text-[13px] font-medium text-plomo
-                   transition-colors duration-140 ease-out hover:bg-borde-sutil"
+                   transition-[background-color,box-shadow,color] duration-160 ease-out
+                   hover:bg-acento-suave hover:text-acento-fuerte"
             [routerLink]="item.ruta"
-            routerLinkActive="bg-acento text-white font-semibold hover:bg-acento"
+            routerLinkActive="bg-acento text-white font-semibold shadow-elevada
+                              hover:bg-acento hover:text-white"
           >
             {{ item.etiqueta }}
           </a>
@@ -24,8 +29,8 @@
   @if (usuario(); as datos) {
     <div class="mt-auto flex items-center gap-2.5 border-t border-borde-sutil px-2.5 pt-3">
       <span
-        class="grid size-7 shrink-0 place-items-center rounded-full border border-borde
-               bg-borde-sutil text-[11px] font-semibold text-plomo"
+        class="grid size-7 shrink-0 place-items-center rounded-full border border-acento-borde
+               bg-acento-suave text-[11px] font-semibold text-acento-fuerte"
       >
         {{ inicial() }}
       </span>
@@ -35,8 +40,8 @@
       </div>
       <button
         type="button"
-        class="rounded-boton px-2 py-1 text-[11px] font-medium text-plomo transition-colors
-               duration-140 ease-out hover:bg-borde-sutil hover:text-tinta"
+        class="rounded-boton px-2 py-1 text-[11px] font-medium text-plomo
+               transition-colors duration-160 ease-out hover:bg-borde-sutil hover:text-tinta"
         (click)="salir.emit()"
       >
         Salir

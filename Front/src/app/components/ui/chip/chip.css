@@ -1,0 +1,12 @@
+:host {
+  display: contents;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+button:not(:disabled):active {
+  transform: translateY(1px);
+}

@@ -9,7 +9,7 @@ import { ItemNavegacion } from '../navegacion.model';
   imports: [RouterLink, RouterLinkActive],
   template: `
     <nav
-      class="border-t border-borde bg-papel px-4 pt-2.5 pb-[22px]"
+      class="border-t border-borde bg-papel/85 px-4 pt-2.5 pb-[22px] backdrop-blur-md"
       style="padding-bottom: max(22px, env(safe-area-inset-bottom))"
     >
       <ul class="grid gap-1.5" [style.grid-template-columns]="'repeat(' + items().length + ', 1fr)'">
@@ -17,9 +17,9 @@ import { ItemNavegacion } from '../navegacion.model';
           <li>
             <a
               class="block rounded-boton px-1.5 py-2.5 text-center text-[12px] font-semibold
-                     text-plomo transition-colors duration-140 ease-out"
+                     text-plomo transition-[background-color,box-shadow,color] duration-160 ease-out"
               [routerLink]="item.ruta"
-              routerLinkActive="bg-acento text-white"
+              routerLinkActive="bg-acento text-white shadow-elevada"
             >
               {{ item.etiqueta }}
             </a>

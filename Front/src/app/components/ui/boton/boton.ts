@@ -1,14 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
-export type VarianteBoton = 'primario' | 'secundario' | 'fantasma';
+export type VarianteBoton = 'primario' | 'secundario' | 'fantasma' | 'peligro';
 export type TamanoBoton = 'sm' | 'md';
 
 const VARIANTES: Record<VarianteBoton, string> = {
-  // Primario: fondo acento, sin borde, texto blanco (boton "Confirmar reserva").
-  primario: 'bg-acento text-white border border-acento hover:bg-tinta hover:border-tinta',
-  // Secundario: el "Reservar" de la tarjeta -> fondo lienzo, borde, texto tinta.
-  secundario: 'bg-lienzo text-tinta border border-borde hover:bg-borde-sutil',
-  fantasma: 'bg-transparent text-plomo border border-transparent hover:text-tinta',
+  // Primario: acento solido con elevacion; es la unica accion de cada vista.
+  primario:
+    'border border-acento bg-acento text-white shadow-elevada hover:border-acento-fuerte hover:bg-acento-fuerte',
+  // Secundario: papel + borde. Al hover se tinta del acento en lugar de gris,
+  // asi la accion se lee como accionable y no como deshabilitada.
+  secundario:
+    'border border-borde bg-papel text-tinta shadow-tarjeta hover:border-acento-borde hover:bg-acento-suave hover:text-acento-fuerte',
+  fantasma: 'border border-transparent bg-transparent text-plomo hover:bg-borde-sutil hover:text-tinta',
+  peligro:
+    'border border-borde bg-papel text-ocupada shadow-tarjeta hover:border-ocupada/40 hover:bg-ocupada/5',
 };
 
 const TAMANOS: Record<TamanoBoton, string> = {
@@ -16,7 +21,7 @@ const TAMANOS: Record<TamanoBoton, string> = {
   md: 'px-4 py-[11px] text-[13px]',
 };
 
-/** Boton base: unifica radios, foco y estados de todos los controles. */
+/** Boton base: unifica radios, foco, elevacion y estados de todos los controles. */
 @Component({
   selector: 'ui-boton',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,7 +41,7 @@ const TAMANOS: Record<TamanoBoton, string> = {
       <ng-content />
     </button>
   `,
-  styleUrl: './boton.scss',
+  styleUrl: './boton.css',
 })
 export class Boton {
   readonly variante = input<VarianteBoton>('secundario');
@@ -51,8 +56,10 @@ export class Boton {
   protected readonly clases = computed(() =>
     [
       'inline-flex items-center justify-center gap-2 rounded-boton font-semibold',
-      // Transiciones minimas: 140ms, solo color de fondo y borde.
-      'transition-colors duration-140 ease-out disabled:pointer-events-none disabled:opacity-45',
+      // Micro-transiciones: 160ms sobre color, borde y sombra (el hundido de
+      // 1px al presionar lo pone boton.css).
+      'transition-[background-color,border-color,box-shadow,color] duration-160 ease-out',
+      'disabled:pointer-events-none disabled:opacity-45 disabled:shadow-none',
       VARIANTES[this.variante()],
       TAMANOS[this.tamano()],
       this.bloque() ? 'w-full' : '',

@@ -22,7 +22,7 @@ import { PuntoEstado } from '../ui';
       <ui-punto-estado [tono]="tono()" />
     </button>
   `,
-  styleUrl: './celda-cochera.scss',
+  styleUrl: './celda-cochera.css',
 })
 export class CeldaCochera {
   readonly cochera = input.required<Cochera>();

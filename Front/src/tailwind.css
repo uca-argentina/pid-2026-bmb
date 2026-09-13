@@ -3,49 +3,85 @@
 @source './app';
 
 /* ---------------------------------------------------------------------------
-   Design tokens de UCAio (handoff "Claude design/README.md").
+   Design tokens de UCAio.
+
+   Base: el handoff "Claude design/README.md". Evolucion: el sistema original
+   era monocromatico y plano (acento gris #374151, sin sombras). Esta version
+   suma identidad de marca -- acento indigo, neutrales frios y una escala de
+   elevacion de tres pasos -- sin mover la estructura ni el espaciado.
+
    Cada token queda disponible como utilidad de Tailwind (bg-papel, text-plomo,
-   rounded-tarjeta) y como custom property para los SCSS de componente.
+   rounded-tarjeta, shadow-tarjeta) y como custom property para los CSS de
+   componente.
 
-   | token del handoff | aca            | hex     |
-   |-------------------|----------------|---------|
-   | surface-page      | lienzo         | #F9FAFB |
-   | surface-card      | papel          | #FFFFFF |
-   | border-default    | borde          | #E5E7EB |
-   | border-subtle     | borde-sutil    | #F3F4F6 |
-   | text-primary      | tinta          | #111827 |
-   | text-secondary    | grafito        | #374151 |
-   | text-muted        | plomo          | #6B7280 |
-   | text-faint        | humo           | #9CA3AF |
-   | accent            | acento         | #374151 |
-   | state-occupied    | ocupada        | #B45309 |
-   | state-low         | baja           | #A16207 |
-   | state-reserved    | reservada      | #94A3B8 |
+   | token del handoff | aca            | antes    | ahora   |
+   |-------------------|----------------|----------|---------|
+   | surface-page      | lienzo         | #F9FAFB  | #F6F7FB |
+   | surface-card      | papel          | #FFFFFF  | #FFFFFF |
+   | border-default    | borde          | #E5E7EB  | #E3E7EF |
+   | border-subtle     | borde-sutil    | #F3F4F6  | #F1F3F8 |
+   | text-primary      | tinta          | #111827  | #0F172A |
+   | text-secondary    | grafito        | #374151  | #334155 |
+   | text-muted        | plomo          | #6B7280  | #64748B |
+   | text-faint        | humo           | #9CA3AF  | #94A3B8 |
+   | accent            | acento         | #374151  | #4F46E5 |
+   | state-occupied    | ocupada        | #B45309  | #DC2626 |
+   | state-low         | baja           | #A16207  | #D97706 |
+   | state-reserved    | reservada      | #94A3B8  | #7C8AA0 |
 
-   El acento es intercambiable: cambiando `--color-acento` se retinta toda la
-   app (tabs y chips activos, boton primario y el punto de estado "Libre").
+   El acento sigue siendo intercambiable: cambiando la terna
+   `--color-acento` / `--color-acento-fuerte` / `--color-acento-suave` se
+   retinta toda la app (nav y chips activos, boton primario, eyebrow, foco,
+   punto de estado "Libre").
 --------------------------------------------------------------------------- */
 @theme {
-  --color-lienzo: #f9fafb;
+  /* Superficies y bordes */
+  --color-lienzo: #f6f7fb;
   --color-papel: #ffffff;
-  --color-borde: #e5e7eb;
-  --color-borde-sutil: #f3f4f6;
-  --color-tinta: #111827;
-  --color-grafito: #374151;
-  --color-plomo: #6b7280;
-  --color-humo: #9ca3af;
-  --color-acento: #374151;
-  --color-ocupada: #b45309;
-  --color-baja: #a16207;
-  --color-reservada: #94a3b8;
+  --color-borde: #e3e7ef;
+  --color-borde-sutil: #f1f3f8;
+
+  /* Texto */
+  --color-tinta: #0f172a;
+  --color-grafito: #334155;
+  --color-plomo: #64748b;
+  --color-humo: #94a3b8;
+
+  /* Acento de marca */
+  --color-acento: #4f46e5;
+  --color-acento-fuerte: #4338ca;
+  --color-acento-suave: #eef2ff;
+  --color-acento-borde: #c7d2fe;
+
+  /* Estados */
+  --color-ocupada: #dc2626;
+  --color-baja: #d97706;
+  --color-reservada: #7c8aa0;
+  --color-exito: #059669;
+  --color-exito-suave: #ecfdf5;
 
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* Radios del handoff: 8 botones/chips · 10 inputs y filas · 12 tarjetas. */
+  /* Radios: 8 botones/chips · 10 inputs y filas · 14 tarjetas. */
   --radius-etiqueta: 0.375rem;
   --radius-boton: 0.5rem;
   --radius-control: 0.625rem;
-  --radius-tarjeta: 0.75rem;
+  --radius-tarjeta: 0.875rem;
 
-  /* Sin sombras en ningun elemento: la separacion es por borde de 1px. */
+  /* ------------------------------------------------------------------
+     Elevacion. El handoff pedia "sin sombras" y separacion por borde de
+     1px; eso dejaba la interfaz plana. Estas tres sombras son de muy baja
+     opacidad y tintadas con el azul de `tinta`, asi que la separacion
+     sigue leyendose como profundidad de papel y no como caja flotante.
+     El borde de 1px se mantiene en todos los casos.
+  ------------------------------------------------------------------ */
+  --shadow-tarjeta:
+    0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.05);
+  --shadow-elevada:
+    0 4px 12px rgb(15 23 42 / 0.07), 0 2px 4px rgb(15 23 42 / 0.04);
+  --shadow-flotante:
+    0 10px 30px rgb(15 23 42 / 0.1), 0 4px 8px rgb(15 23 42 / 0.04);
+
+  /* Curva y duracion unicas para todas las micro-transiciones. */
+  --ease-suave: cubic-bezier(0.22, 0.61, 0.36, 1);
 }

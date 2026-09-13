@@ -25,8 +25,16 @@
 
       <!-- KPIs -->
       <div class="grid grid-cols-3 gap-4">
-        <app-kpi [valor]="recursoResumen.value()?.reservasHoy ?? '—'" etiqueta="Reservas hoy" />
-        <app-kpi [valor]="recursoResumen.value()?.cocherasLibres ?? '—'" etiqueta="Cocheras libres" />
+        <app-kpi
+          [valor]="recursoResumen.value()?.reservasHoy ?? '—'"
+          etiqueta="Reservas hoy"
+          tono="acento"
+        />
+        <app-kpi
+          [valor]="recursoResumen.value()?.cocherasLibres ?? '—'"
+          etiqueta="Cocheras libres"
+          tono="exito"
+        />
         <app-kpi [valor]="ingresos()" etiqueta="Ingresos del día" />
       </div>
 

@@ -7,7 +7,7 @@ import { ETIQUETA_TIPO_VEHICULO, Id, Vehiculo } from '../../models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
   templateUrl: './selector-vehiculo.html',
-  styleUrl: './selector-vehiculo.scss',
+  styleUrl: './selector-vehiculo.css',
   host: { class: 'block' },
 })
 export class SelectorVehiculo {

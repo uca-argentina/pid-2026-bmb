@@ -1,0 +1,19 @@
+:host {
+  display: contents;
+}
+
+button {
+  position: relative;
+}
+
+/* El anillo del acento sobre un boton primario del mismo color no se
+   distingue: se separa con un halo blanco intermedio. */
+button:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+/* Hundido de 1px al presionar: la unica animacion de posicion del sistema. */
+button:not(:disabled):active {
+  transform: translateY(1px);
+}

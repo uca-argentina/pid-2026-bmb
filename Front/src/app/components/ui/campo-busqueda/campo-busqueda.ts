@@ -6,13 +6,16 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <label
-      class="flex items-center gap-2.5 rounded-control border border-borde bg-papel px-3.5 py-3
-             focus-within:border-humo lg:py-[11px]"
+      class="group flex items-center gap-2.5 rounded-control border border-borde bg-papel px-3.5 py-3
+             shadow-tarjeta transition-[border-color,box-shadow] duration-160 ease-out
+             hover:border-acento-borde focus-within:border-acento
+             focus-within:ring-[3px] focus-within:ring-acento-suave lg:py-[11px]"
     >
       <span class="sr-only">{{ etiqueta() }}</span>
 
       <svg
-        class="size-3.5 shrink-0 text-humo"
+        class="size-4 shrink-0 text-humo transition-colors duration-160 ease-out
+               group-focus-within:text-acento"
         viewBox="0 0 16 16"
         fill="none"
         stroke="currentColor"

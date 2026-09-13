@@ -9,7 +9,7 @@ import { aFechaISO, proximosDias } from '../../utils/fecha.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe],
   templateUrl: './selector-fecha.html',
-  styleUrl: './selector-fecha.scss',
+  styleUrl: './selector-fecha.css',
   host: { class: 'block' },
 })
 export class SelectorFecha {
