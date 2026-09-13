@@ -122,6 +122,63 @@
     color: var(--color-tinta);
   }
 
+  /* Campo de formulario: label arriba e input con anillo del acento al foco.
+     Lo comparten ingresar, registro y los formularios de alta. */
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .campo input {
+    padding: 12px 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-control);
+    background: var(--color-papel);
+    color: var(--color-tinta);
+    font: inherit;
+    font-size: 14px;
+    transition:
+      border-color 160ms var(--ease-suave),
+      box-shadow 160ms var(--ease-suave);
+  }
+
+  .campo input::placeholder {
+    color: var(--color-humo);
+  }
+
+  /* El anillo tenue reemplaza al `outline: none` del prototipo: el foco sigue
+     siendo visible por teclado y ademas se ve al hacer clic. */
+  .campo input:focus {
+    border-color: var(--color-acento);
+    box-shadow: 0 0 0 3px var(--color-acento-suave);
+    outline: none;
+  }
+
+  .campo input:focus-visible {
+    outline: 2px solid var(--color-acento);
+    outline-offset: 2px;
+  }
+
+  .campo input.ng-touched.ng-invalid {
+    border-color: var(--color-ocupada);
+  }
+
+  .campo input.ng-touched.ng-invalid:focus {
+    box-shadow: 0 0 0 3px rgb(220 38 38 / 0.12);
+  }
+
+  /* Texto de ayuda y de error debajo de un campo. */
+  .campo-ayuda {
+    font-size: 12px;
+    color: var(--color-plomo);
+  }
+
+  .campo-error {
+    font-size: 12px;
+    color: var(--color-ocupada);
+  }
+
   .num-tabular {
     font-variant-numeric: tabular-nums;
   }

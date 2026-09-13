@@ -85,9 +85,16 @@
                   <ui-cargando [cantidad]="1" />
                 } @else if (recursoVehiculos.value().length === 0) {
                   <ui-estado-vacio
-                    titulo="Todavia no cargaste vehiculos"
-                    descripcion="Registra un vehiculo para poder reservar."
-                  />
+                    titulo="Todavía no cargaste vehículos"
+                    descripcion="Agregá uno para poder reservar."
+                  >
+                    <ui-boton
+                      routerLink="/conductor/vehiculos"
+                      [queryParams]="{ volver: '/conductor/reservar/' + estacionamientoId() }"
+                    >
+                      Agregar vehículo
+                    </ui-boton>
+                  </ui-estado-vacio>
                 } @else {
                   <app-selector-vehiculo
                     [vehiculos]="recursoVehiculos.value()"

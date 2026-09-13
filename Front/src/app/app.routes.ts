@@ -14,6 +14,12 @@ export const routes: Routes = [
     canActivate: [invitadoGuard],
     loadComponent: () => import('./pages/ingresar/ingresar').then((m) => m.Ingresar),
   },
+  {
+    path: 'registrarse',
+    title: 'Parkit · Crear cuenta',
+    canActivate: [invitadoGuard],
+    loadComponent: () => import('./pages/registro/registro').then((m) => m.Registro),
+  },
 
   /* ------------------------------- CONDUCTOR ------------------------------ */
   {
@@ -39,6 +45,12 @@ export const routes: Routes = [
         path: 'mis-reservas',
         title: 'Parkit · Mis reservas',
         loadComponent: () => import('./pages/mis-reservas/mis-reservas').then((m) => m.MisReservas),
+      },
+      {
+        path: 'vehiculos',
+        title: 'Parkit · Mis vehículos',
+        loadComponent: () =>
+          import('./pages/mis-vehiculos/mis-vehiculos').then((m) => m.MisVehiculos),
       },
       { path: '', pathMatch: 'full', redirectTo: 'explorar' },
     ],

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Boton } from '../../components/ui';
 import { inicioSegunRol } from '../../guards/rol.guard';
 import { Credenciales, RolUsuario } from '../../models';
@@ -10,9 +10,8 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-ingresar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Boton],
+  imports: [ReactiveFormsModule, RouterLink, Boton],
   templateUrl: './ingresar.html',
-  styleUrl: './ingresar.css',
 })
 export class Ingresar {
   private readonly auth = inject(AuthService);

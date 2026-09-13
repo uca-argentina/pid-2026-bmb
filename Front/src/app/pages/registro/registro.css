@@ -1,0 +1,29 @@
+/* Tarjeta de rol: el radio nativo queda oculto y el estado se pinta con :has(),
+   asi el grupo conserva la navegacion con flechas del teclado. */
+.opcion-rol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-control);
+  background: var(--color-papel);
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease-suave),
+    background-color 160ms var(--ease-suave);
+}
+
+.opcion-rol:hover {
+  border-color: var(--color-acento-borde);
+}
+
+.opcion-rol:has(input:checked) {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+}
+
+.opcion-rol:has(input:focus-visible) {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
