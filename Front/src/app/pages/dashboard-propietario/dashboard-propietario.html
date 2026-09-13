@@ -26,16 +26,19 @@
       <!-- KPIs -->
       <div class="grid grid-cols-3 gap-4">
         <app-kpi
-          [valor]="recursoResumen.value()?.reservasHoy ?? '—'"
+          [valor]="recursoReservasHoy.isLoading() ? '—' : resumen().reservasHoy"
           etiqueta="Reservas hoy"
           tono="acento"
         />
         <app-kpi
-          [valor]="recursoResumen.value()?.cocherasLibres ?? '—'"
+          [valor]="recursoCocheras.isLoading() ? '—' : resumen().cocherasLibres"
           etiqueta="Cocheras libres"
           tono="exito"
         />
-        <app-kpi [valor]="ingresos()" etiqueta="Ingresos del día" />
+        <app-kpi
+          [valor]="recursoReservasHoy.isLoading() ? '—' : ingresos()"
+          etiqueta="Ingresos del día"
+        />
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
@@ -44,9 +47,9 @@
           <div class="flex flex-col gap-[18px]">
             <div class="flex items-center justify-between gap-4">
               <p class="label-campo">Estado de cocheras</p>
-              @if (recursoResumen.value(); as resumen) {
+              @if (!recursoCocheras.isLoading()) {
                 <p class="num-tabular text-[11.5px] text-humo">
-                  Actualizado {{ resumen.actualizadoEn | date: 'HH:mm' }}
+                  Actualizado {{ actualizadoEn() | date: 'HH:mm' }}
                 </p>
               }
             </div>
@@ -77,7 +80,11 @@
                     Cochera {{ cochera.identificador }}
                   </p>
                   <p class="text-[12px] text-plomo">
-                    Sector {{ cochera.sector }} · {{ cochera.cubierta ? 'Cubierta' : 'Descubierta' }}
+                    @if (cochera.sector) {
+                      Sector {{ cochera.sector }} ·
+                    }
+                    {{ cochera.cubierta ? 'Cubierta' : 'Descubierta' }} ·
+                    {{ etiquetaTipo[cochera.tipoVehiculo] }}
                   </p>
                 </div>
 

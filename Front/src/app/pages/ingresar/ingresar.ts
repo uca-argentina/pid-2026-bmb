@@ -27,10 +27,13 @@ export class Ingresar {
   protected readonly enviando = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  /** Accesos de demostracion mientras los servicios corren con mocks. */
+  /**
+   * Accesos de demostracion: existen en los mocks y, contra la API, los carga
+   * `npm run db:demo` en el backend.
+   */
   protected readonly demos: { rol: RolUsuario; etiqueta: string; email: string }[] = [
-    { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@ucaio.com' },
-    { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@ucaio.com' },
+    { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@parkit.com' },
+    { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@parkit.com' },
   ];
 
   protected enviar(): void {

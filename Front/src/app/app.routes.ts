@@ -10,7 +10,7 @@ import { rolGuard } from './guards/rol.guard';
 export const routes: Routes = [
   {
     path: 'ingresar',
-    title: 'UCAio · Ingresar',
+    title: 'Parkit · Ingresar',
     canActivate: [invitadoGuard],
     loadComponent: () => import('./pages/ingresar/ingresar').then((m) => m.Ingresar),
   },
@@ -23,7 +23,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'explorar',
-        title: 'UCAio · Explorar',
+        title: 'Parkit · Explorar',
         loadComponent: () =>
           import('./pages/explorar-estacionamientos/explorar-estacionamientos').then(
             (m) => m.ExplorarEstacionamientos,
@@ -31,13 +31,13 @@ export const routes: Routes = [
       },
       {
         path: 'reservar/:estacionamientoId',
-        title: 'UCAio · Reservar',
+        title: 'Parkit · Reservar',
         loadComponent: () =>
           import('./pages/flujo-reserva/flujo-reserva').then((m) => m.FlujoReserva),
       },
       {
         path: 'mis-reservas',
-        title: 'UCAio · Mis reservas',
+        title: 'Parkit · Mis reservas',
         loadComponent: () => import('./pages/mis-reservas/mis-reservas').then((m) => m.MisReservas),
       },
       { path: '', pathMatch: 'full', redirectTo: 'explorar' },
@@ -52,7 +52,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'tablero',
-        title: 'UCAio · Tablero',
+        title: 'Parkit · Tablero',
         loadComponent: () =>
           import('./pages/dashboard-propietario/dashboard-propietario').then(
             (m) => m.DashboardPropietario,
@@ -60,7 +60,7 @@ export const routes: Routes = [
       },
       {
         path: 'reservas',
-        title: 'UCAio · Reservas recibidas',
+        title: 'Parkit · Reservas recibidas',
         loadComponent: () =>
           import('./pages/reservas-estacionamiento/reservas-estacionamiento').then(
             (m) => m.ReservasEstacionamiento,

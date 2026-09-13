@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Id, NuevoVehiculo, Vehiculo } from '../models';
+import { NuevoVehiculo, Vehiculo } from '../models';
+import { VehiculoDto } from './api/api.dto';
+import { aPayloadVehiculo, aVehiculo } from './api/api.mapeo';
 import { ID_CONDUCTOR, VEHICULOS_MOCK } from './mocks/datos-mock';
 import { clonar, simular } from './mocks/mock.util';
 
@@ -19,37 +21,29 @@ export class VehiculoService {
       return simular(clonar(VEHICULOS_MOCK.filter((v) => v.usuarioId === ID_CONDUCTOR)));
     }
 
-    return this.http.get<Vehiculo[]>(this.ruta);
-  }
-
-  /** `GET /api/vehiculos/:id` */
-  obtener(id: Id): Observable<Vehiculo> {
-    if (environment.usarMocks) {
-      return simular(clonar(VEHICULOS_MOCK.find((v) => v.id === id) ?? VEHICULOS_MOCK[0]));
-    }
-
-    return this.http.get<Vehiculo>(`${this.ruta}/${id}`);
+    return this.http
+      .get<{ vehiculos: VehiculoDto[] }>(this.ruta)
+      .pipe(map(({ vehiculos }) => vehiculos.map(aVehiculo)));
   }
 
   /** `POST /api/vehiculos` */
   crear(datos: NuevoVehiculo): Observable<Vehiculo> {
     if (environment.usarMocks) {
       return simular<Vehiculo>({
-        ...datos,
         id: `veh-${crypto.randomUUID()}`,
         usuarioId: ID_CONDUCTOR,
+        patente: datos.patente,
+        marca: datos.marca ?? null,
+        modelo: datos.modelo ?? null,
+        color: datos.color ?? null,
+        tipo: datos.tipo,
+        predeterminado: datos.predeterminado ?? false,
+        activo: true,
       });
     }
 
-    return this.http.post<Vehiculo>(this.ruta, datos);
-  }
-
-  /** `DELETE /api/vehiculos/:id` */
-  eliminar(id: Id): Observable<void> {
-    if (environment.usarMocks) {
-      return simular(undefined as void);
-    }
-
-    return this.http.delete<void>(`${this.ruta}/${id}`);
+    return this.http
+      .post<{ vehiculo: VehiculoDto }>(this.ruta, aPayloadVehiculo(datos))
+      .pipe(map(({ vehiculo }) => aVehiculo(vehiculo)));
   }
 }

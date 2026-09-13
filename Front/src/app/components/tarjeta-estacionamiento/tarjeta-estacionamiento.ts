@@ -34,7 +34,7 @@ export class TarjetaEstacionamiento {
   protected readonly ubicacion = computed(() => {
     const { direccion, distanciaKm } = this.estacionamiento();
     const distancia = formatearDistancia(distanciaKm);
-    const base = `${direccion.calle} ${direccion.numero}`;
+    const base = `${direccion.calle} ${direccion.numero}`.trim();
     return distancia ? `${base} · ${distancia}` : base;
   });
 

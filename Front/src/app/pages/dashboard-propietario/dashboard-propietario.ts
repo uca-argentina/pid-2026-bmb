@@ -9,6 +9,7 @@ import { Boton, Cargando, Chip, EstadoVacio, Tarjeta } from '../../components/ui
 import {
   Cochera,
   ESTADOS_COCHERA_ORDEN,
+  ETIQUETA_TIPO_VEHICULO,
   Estacionamiento,
   EstadoCochera,
   Id,
@@ -45,6 +46,7 @@ export class DashboardPropietario {
   private readonly auth = inject(AuthService);
 
   protected readonly estados = ESTADOS_COCHERA_ORDEN;
+  protected readonly etiquetaTipo = ETIQUETA_TIPO_VEHICULO;
   protected readonly seleccionadoId = signal<Id | null>(null);
   protected readonly cocheraAbierta = signal<Cochera | null>(null);
 
@@ -60,11 +62,6 @@ export class DashboardPropietario {
     return lista.find((e) => e.id === this.seleccionadoId()) ?? lista[0] ?? null;
   });
 
-  protected readonly recursoResumen = rxResource({
-    params: () => this.activo()?.id,
-    stream: ({ params }) => this.estacionamientos.resumenDiario(params),
-  });
-
   protected readonly recursoCocheras = rxResource({
     params: () => this.activo()?.id,
     stream: ({ params }) => this.cocheras.listarPorEstacionamiento(params),
@@ -77,10 +74,25 @@ export class DashboardPropietario {
     defaultValue: [] as ReservaDetallada[],
   });
 
-  protected readonly ingresos = computed(() => {
-    const resumen = this.recursoResumen.value();
-    return resumen ? `$ ${resumen.ingresosDelDia.toLocaleString('es-AR')}` : '—';
+  /** KPIs del dia, derivados de las cocheras y las reservas ya cargadas. */
+  protected readonly resumen = computed(() => {
+    const reservas = this.recursoReservasHoy.value().filter((r) => r.estado !== 'CANCELADA');
+    return {
+      reservasHoy: reservas.length,
+      cocherasLibres: this.recursoCocheras.value().filter((c) => c.estado === 'LIBRE').length,
+      ingresos: reservas.reduce((total, r) => total + r.precioTotal, 0),
+    };
   });
+
+  /** Momento del ultimo refresco de la cuadricula ("Actualizado 9:38"). */
+  protected readonly actualizadoEn = computed(() => {
+    this.recursoCocheras.value();
+    return new Date();
+  });
+
+  protected readonly ingresos = computed(
+    () => `$ ${this.resumen().ingresos.toLocaleString('es-AR')}`,
+  );
 
   protected seleccionar(id: Id): void {
     this.seleccionadoId.set(id);
@@ -91,13 +103,12 @@ export class DashboardPropietario {
     this.cocheraAbierta.update((actual) => (actual?.id === cochera.id ? null : cochera));
   }
 
-  /** `PATCH /api/cocheras/:id` y refresco de la cuadricula y los KPIs. */
+  /** `PATCH /api/estacionamientos/:id/cocheras/:idCochera` y refresco de la cuadricula. */
   protected cambiarEstado(cochera: Cochera, estado: EstadoCochera): void {
-    this.cocheras.cambiarEstado(cochera.id, estado).subscribe({
+    this.cocheras.cambiarEstado(cochera, estado).subscribe({
       next: () => {
         this.cocheraAbierta.set(null);
         this.recursoCocheras.reload();
-        this.recursoResumen.reload();
       },
     });
   }

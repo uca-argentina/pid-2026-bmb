@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Credenciales, RegistroUsuario, RolUsuario, SesionAuth, Usuario } from '../models';
+import { SesionDto, UsuarioDto } from './api/api.dto';
+import { aPayloadRegistro, aSesion, aUsuario } from './api/api.mapeo';
 import { USUARIOS_MOCK } from './mocks/datos-mock';
 import { clonar, simular, simularError } from './mocks/mock.util';
 
-const CLAVE_SESION = 'ucaio.sesion';
+const CLAVE_SESION = 'parkit.sesion';
 
 /**
  * Sesion del usuario y llamadas a `/api/auth`.
@@ -43,12 +45,13 @@ export class AuthService {
       );
     }
 
-    return this.http
-      .post<SesionAuth>(`${this.ruta}/login`, credenciales)
-      .pipe(tap((sesion) => this.guardarSesion(sesion)));
+    return this.http.post<SesionDto>(`${this.ruta}/login`, credenciales).pipe(
+      map(aSesion),
+      tap((sesion) => this.guardarSesion(sesion)),
+    );
   }
 
-  /** `POST /api/auth/registro` */
+  /** `POST /api/auth/register` */
   registro(datos: RegistroUsuario): Observable<SesionAuth> {
     if (environment.usarMocks) {
       const usuario: Usuario = {
@@ -56,7 +59,7 @@ export class AuthService {
         nombre: datos.nombre,
         apellido: datos.apellido,
         email: datos.email,
-        telefono: datos.telefono,
+        telefono: datos.telefono ?? null,
         rol: datos.rol,
         fechaAlta: new Date().toISOString(),
         activo: true,
@@ -66,19 +69,22 @@ export class AuthService {
       );
     }
 
-    return this.http
-      .post<SesionAuth>(`${this.ruta}/registro`, datos)
-      .pipe(tap((sesion) => this.guardarSesion(sesion)));
+    return this.http.post<SesionDto>(`${this.ruta}/register`, aPayloadRegistro(datos)).pipe(
+      map(aSesion),
+      tap((sesion) => this.guardarSesion(sesion)),
+    );
   }
 
-  /** `GET /api/auth/perfil` */
+  /** `GET /api/auth/me` */
   perfil(): Observable<Usuario> {
     if (environment.usarMocks) {
       const usuario = this.usuario();
       return usuario ? simular(clonar(usuario)) : simularError<Usuario>('No hay sesion activa');
     }
 
-    return this.http.get<Usuario>(`${this.ruta}/perfil`);
+    return this.http
+      .get<{ usuario: UsuarioDto }>(`${this.ruta}/me`)
+      .pipe(map((respuesta) => aUsuario(respuesta.usuario)));
   }
 
   logout(): void {

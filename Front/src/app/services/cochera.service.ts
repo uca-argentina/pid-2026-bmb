@@ -2,15 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Cochera, EstadoCochera, Id, NuevaCochera, ResumenOcupacion } from '../models';
+import { Cochera, EstadoCochera, Id, NuevaCochera } from '../models';
+import { CocheraDto } from './api/api.dto';
+import { aCochera, aPayloadCochera } from './api/api.mapeo';
 import { COCHERAS_MOCK } from './mocks/datos-mock';
-import { clonar, simular, simularError } from './mocks/mock.util';
+import { clonar, simular } from './mocks/mock.util';
 
-/** Acceso a `/api/cocheras` y a la ocupacion por estacionamiento. */
+/** Cocheras de un estacionamiento: `/api/estacionamientos/:id/cocheras`. */
 @Injectable({ providedIn: 'root' })
 export class CocheraService {
   private readonly http = inject(HttpClient);
-  private readonly ruta = '/cocheras';
 
   /** `GET /api/estacionamientos/:id/cocheras` */
   listarPorEstacionamiento(estacionamientoId: Id): Observable<Cochera[]> {
@@ -18,59 +19,44 @@ export class CocheraService {
       return simular(clonar(COCHERAS_MOCK.filter((c) => c.estacionamientoId === estacionamientoId)));
     }
 
-    return this.http.get<Cochera[]>(`/estacionamientos/${estacionamientoId}/cocheras`);
+    return this.http
+      .get<{ cocheras: CocheraDto[] }>(rutaCocheras(estacionamientoId))
+      .pipe(map(({ cocheras }) => cocheras.map(aCochera)));
   }
 
-  /** `GET /api/estacionamientos/:id/ocupacion` */
-  resumenOcupacion(estacionamientoId: Id): Observable<ResumenOcupacion> {
+  /** `PATCH /api/estacionamientos/:id/cocheras/:idCochera` */
+  cambiarEstado(cochera: Cochera, estado: EstadoCochera): Observable<Cochera> {
     if (environment.usarMocks) {
-      return this.listarPorEstacionamiento(estacionamientoId).pipe(
-        map((cocheras) => calcularOcupacion(estacionamientoId, cocheras)),
-      );
+      return simular({ ...clonar(cochera), estado });
     }
 
-    return this.http.get<ResumenOcupacion>(`/estacionamientos/${estacionamientoId}/ocupacion`);
+    return this.http
+      .patch<{ cochera: CocheraDto }>(`${rutaCocheras(cochera.estacionamientoId)}/${cochera.id}`, {
+        estado_actual: estado,
+      })
+      .pipe(map((respuesta) => aCochera(respuesta.cochera)));
   }
 
-  /** `PATCH /api/cocheras/:id` */
-  cambiarEstado(id: Id, estado: EstadoCochera): Observable<Cochera> {
-    if (environment.usarMocks) {
-      const base = COCHERAS_MOCK.find((c) => c.id === id);
-      return base
-        ? simular({ ...clonar(base), estado })
-        : simularError<Cochera>('Cochera no encontrada');
-    }
-
-    return this.http.patch<Cochera>(`${this.ruta}/${id}`, { estado });
-  }
-
-  /** `POST /api/cocheras` */
+  /** `POST /api/estacionamientos/:id/cocheras` */
   crear(datos: NuevaCochera): Observable<Cochera> {
     if (environment.usarMocks) {
-      return simular<Cochera>({ ...datos, id: `coc-${crypto.randomUUID()}` });
+      return simular<Cochera>({
+        id: `coc-${crypto.randomUUID()}`,
+        estacionamientoId: datos.estacionamientoId,
+        identificador: datos.identificador,
+        sector: datos.sector ?? '',
+        tipoVehiculo: datos.tipoVehiculo,
+        cubierta: datos.cubierta ?? false,
+        estado: datos.estado ?? 'LIBRE',
+      });
     }
 
-    return this.http.post<Cochera>(this.ruta, datos);
+    return this.http
+      .post<{ cochera: CocheraDto }>(rutaCocheras(datos.estacionamientoId), aPayloadCochera(datos))
+      .pipe(map((respuesta) => aCochera(respuesta.cochera)));
   }
 }
 
-/** Mismo agregado que devolvera el endpoint de ocupacion. */
-export function calcularOcupacion(
-  estacionamientoId: Id,
-  cocheras: Cochera[],
-): ResumenOcupacion {
-  const contar = (estado: EstadoCochera) => cocheras.filter((c) => c.estado === estado).length;
-  const total = cocheras.length;
-  const ocupadas = contar('OCUPADA');
-  const reservadas = contar('RESERVADA');
-
-  return {
-    estacionamientoId,
-    total,
-    libres: contar('LIBRE'),
-    ocupadas,
-    reservadas,
-    mantenimiento: contar('MANTENIMIENTO'),
-    porcentajeOcupacion: total === 0 ? 0 : Math.round(((ocupadas + reservadas) / total) * 100),
-  };
+function rutaCocheras(estacionamientoId: Id): string {
+  return `/estacionamientos/${estacionamientoId}/cocheras`;
 }

@@ -1,5 +1,5 @@
 /**
- * Contratos genericos de la API de UCAio (Express).
+ * Contratos genericos de la API de Parkit (Express).
  * El backend unifica los errores en `{ error: { message, details? } }`
  * (ver Back/src/middlewares/errorHandler.js).
  */

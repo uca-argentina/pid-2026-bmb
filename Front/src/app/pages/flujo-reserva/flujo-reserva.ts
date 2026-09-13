@@ -7,8 +7,7 @@ import { SelectorFecha } from '../../components/selector-fecha/selector-fecha';
 import { RangoHorario, SelectorFranja } from '../../components/selector-franja/selector-franja';
 import { SelectorVehiculo } from '../../components/selector-vehiculo/selector-vehiculo';
 import { Boton, Cargando, EstadoVacio, Tarjeta } from '../../components/ui';
-import { Cochera, FranjaDisponible, Id, Reserva, Vehiculo } from '../../models';
-import { CocheraService } from '../../services/cochera.service';
+import { FranjaDisponible, Id, Reserva, Vehiculo } from '../../models';
 import { EstacionamientoService } from '../../services/estacionamiento.service';
 import { ReservaService } from '../../services/reserva.service';
 import { VehiculoService } from '../../services/vehiculo.service';
@@ -39,7 +38,6 @@ import { aFechaISO, desdeFechaISO } from '../../utils/fecha.util';
 export class FlujoReserva {
   private readonly estacionamientos = inject(EstacionamientoService);
   private readonly vehiculos = inject(VehiculoService);
-  private readonly cocheras = inject(CocheraService);
   private readonly reservas = inject(ReservaService);
   private readonly router = inject(Router);
 
@@ -65,30 +63,21 @@ export class FlujoReserva {
     defaultValue: [] as Vehiculo[],
   });
 
-  protected readonly recursoDisponibilidad = rxResource({
-    params: () => {
-      const fecha = this.borrador().fecha;
-      return fecha ? { estacionamientoId: this.estacionamientoId(), fecha } : undefined;
-    },
-    stream: ({ params }) => this.reservas.disponibilidad(params),
-    defaultValue: [] as FranjaDisponible[],
-  });
-
-  protected readonly recursoCocheras = rxResource({
-    params: () => this.estacionamientoId(),
-    stream: ({ params }) => this.cocheras.listarPorEstacionamiento(params),
-    defaultValue: [] as Cochera[],
-  });
-
   protected readonly vehiculoElegido = computed(
     () => this.recursoVehiculos.value().find((v) => v.id === this.borrador().vehiculoId) ?? null,
   );
 
-  /** Primera cochera libre compatible: la definitiva la asigna el backend. */
-  protected readonly cocheraSugerida = computed<Cochera | null>(() => {
-    const tipo = this.vehiculoElegido()?.tipo;
-    const libres = this.recursoCocheras.value().filter((c) => c.estado === 'LIBRE');
-    return libres.find((c) => c.tipoVehiculo === tipo) ?? libres[0] ?? null;
+  /** Las franjas dependen del tipo de vehiculo: se piden con fecha y vehiculo elegidos. */
+  protected readonly recursoDisponibilidad = rxResource({
+    params: () => {
+      const fecha = this.borrador().fecha;
+      const tipoVehiculo = this.vehiculoElegido()?.tipo;
+      return fecha && tipoVehiculo
+        ? { estacionamientoId: this.estacionamientoId(), fecha, tipoVehiculo }
+        : undefined;
+    },
+    stream: ({ params }) => this.reservas.disponibilidad(params),
+    defaultValue: [] as FranjaDisponible[],
   });
 
   protected readonly total = computed(() => {
@@ -102,7 +91,7 @@ export class FlujoReserva {
     if (!estacionamiento) return '';
     const { direccion, precioPorHora, distanciaKm } = estacionamiento;
     const distancia = formatearDistancia(distanciaKm);
-    const base = `${direccion.calle} ${direccion.numero}`;
+    const base = `${direccion.calle} ${direccion.numero}`.trim();
     return `${base}${distancia ? ` · ${distancia}` : ''} · $ ${precioPorHora.toLocaleString('es-AR')} por hora`;
   });
 
@@ -138,8 +127,9 @@ export class FlujoReserva {
     });
   }
 
+  /** Cambiar de vehiculo cambia las franjas disponibles: se vuelve a proponer una. */
   protected elegirVehiculo(vehiculoId: Id | null): void {
-    this.reservas.actualizarBorrador({ vehiculoId });
+    this.reservas.actualizarBorrador({ vehiculoId, horaDesde: null, horaHasta: null });
   }
 
   protected elegirFecha(fecha: string | null): void {
@@ -166,7 +156,7 @@ export class FlujoReserva {
       },
       error: (e: Error) => {
         this.confirmando.set(false);
-        // Caso tipico: la cochera se ocupo mientras el usuario elegia.
+        // Caso tipico: la ultima cochera se ocupo mientras el usuario elegia.
         this.error.set(e.message);
         this.recursoDisponibilidad.reload();
       },

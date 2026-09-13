@@ -7,7 +7,7 @@ export interface Usuario {
   nombre: string;
   apellido: string;
   email: string;
-  telefono: string;
+  telefono: string | null;
   rol: RolUsuario;
   fechaAlta: FechaHoraISO;
   activo: boolean;
@@ -19,17 +19,17 @@ export interface Credenciales {
   password: string;
 }
 
-/** Payload de `POST /api/auth/registro`. */
+/** Payload de `POST /api/auth/register`. */
 export interface RegistroUsuario {
   nombre: string;
   apellido: string;
   email: string;
-  telefono: string;
+  telefono?: string;
   password: string;
   rol: RolUsuario;
 }
 
-/** Respuesta de `POST /api/auth/login` y `/registro`. */
+/** Respuesta de `POST /api/auth/login` y `/register`. */
 export interface SesionAuth {
   token: string;
   usuario: Usuario;

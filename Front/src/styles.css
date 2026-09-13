@@ -127,7 +127,7 @@
   }
 
   /* Marca: cuadrado del acento con la inicial, usada en login, sidebar y
-     header mobile. Reemplaza al texto suelto "UCAio". */
+     header mobile. Reemplaza al texto suelto "Parkit". */
   .marca-logo {
     display: grid;
     place-items: center;

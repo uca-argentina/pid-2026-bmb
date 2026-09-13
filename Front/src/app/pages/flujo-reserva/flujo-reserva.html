@@ -36,6 +36,12 @@
                 >{{ reserva.horaDesde }} a {{ reserva.horaHasta }}</span
               >.
             </p>
+            <div class="flex items-center justify-between gap-4">
+              <span class="text-[13px] text-plomo">Cochera asignada</span>
+              <span class="num-tabular text-[13px] font-medium text-tinta">
+                {{ reserva.cocheraIdentificador ?? '—' }}
+              </span>
+            </div>
             <div class="h-px bg-borde-sutil"></div>
             <div class="flex items-center justify-between gap-4">
               <span class="text-[13px] text-plomo">Total</span>
@@ -121,7 +127,6 @@
                 [horaHasta]="borrador().horaHasta"
                 [horas]="horas()"
                 [total]="total()"
-                [cochera]="cocheraSugerida()"
               />
             </ui-tarjeta>
 

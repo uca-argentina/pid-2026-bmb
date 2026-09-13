@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Cochera, HoraHHmm } from '../../models';
+import { HoraHHmm } from '../../models';
 
 /** Resumen de la reserva: duracion, cochera asignada y total. */
 @Component({
@@ -14,7 +14,8 @@ export class ResumenReserva {
   readonly horaHasta = input<HoraHHmm | null>(null);
   readonly horas = input(0);
   readonly total = input(0);
-  readonly cochera = input<Cochera | null>(null);
+  /** Identificador de la cochera, cuando ya esta asignada. */
+  readonly cochera = input<string | null>(null);
 
   /** "3 h · 10:00 – 13:00" */
   protected readonly duracion = computed(() => {
@@ -24,12 +25,8 @@ export class ResumenReserva {
     return `${this.horas()} h · ${desde} – ${hasta}`;
   });
 
-  /** "A2 · Cubierta". La cochera definitiva la asigna el backend al confirmar. */
-  protected readonly textoCochera = computed(() => {
-    const cochera = this.cochera();
-    if (!cochera) return 'Se asigna al confirmar';
-    return `${cochera.identificador} · ${cochera.cubierta ? 'Cubierta' : 'Descubierta'}`;
-  });
+  /** La cochera la asigna el backend al confirmar. */
+  protected readonly textoCochera = computed(() => this.cochera() ?? 'Se asigna al confirmar');
 
   protected readonly totalFormateado = computed(() => this.total().toLocaleString('es-AR'));
 }

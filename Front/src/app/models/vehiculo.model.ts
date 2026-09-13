@@ -14,12 +14,21 @@ export interface Vehiculo {
   /** FK -> Usuario.id (rol CONDUCTOR). */
   usuarioId: Id;
   patente: string;
-  marca: string;
-  modelo: string;
-  color: string;
+  marca: string | null;
+  modelo: string | null;
+  color: string | null;
   tipo: TipoVehiculo;
+  /** Se preselecciona al reservar. Como mucho uno por conductor. */
   predeterminado: boolean;
+  activo: boolean;
 }
 
 /** Payload de `POST /api/vehiculos`. */
-export type NuevoVehiculo = Omit<Vehiculo, 'id' | 'usuarioId'>;
+export interface NuevoVehiculo {
+  patente: string;
+  tipo: TipoVehiculo;
+  marca?: string | null;
+  modelo?: string | null;
+  color?: string | null;
+  predeterminado?: boolean;
+}
