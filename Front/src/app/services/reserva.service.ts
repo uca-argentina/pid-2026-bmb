@@ -1,29 +1,23 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 import {
   BORRADOR_VACIO,
   BorradorReserva,
   ConsultaDisponibilidad,
   FechaISO,
-  FRANJAS_ESTANDAR,
   FranjaDisponible,
+  FRANJAS_ESTANDAR,
   Id,
   NuevaReserva,
   Reserva,
   ReservaDetallada,
-} from '../models';
-import { duracionEnHoras } from '../utils/fecha.util';
+} from '@app/models';
+import { duracionEnHoras } from '@app/utils/fecha.util';
 import { FranjaDto, ReservaDto } from './api/api.dto';
 import { ID_TIPO_VEHICULO, aFranja, aPayloadReserva, aReserva } from './api/api.mapeo';
-import {
-  COCHERAS_MOCK,
-  ESTACIONAMIENTOS_MOCK,
-  ID_CONDUCTOR,
-  RESERVAS_MOCK,
-  VEHICULOS_MOCK,
-} from './mocks/datos-mock';
+import { COCHERAS_MOCK, ESTACIONAMIENTOS_MOCK, ID_CONDUCTOR, RESERVAS_MOCK, VEHICULOS_MOCK } from './mocks/datos-mock';
 import { clonar, simular, simularError } from './mocks/mock.util';
 
 /**

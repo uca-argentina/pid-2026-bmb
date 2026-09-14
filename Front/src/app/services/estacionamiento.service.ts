@@ -1,14 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 import {
   Estacionamiento,
   FiltrosEstacionamiento,
   Id,
   NuevoEstacionamiento,
   OrdenEstacionamiento,
-} from '../models';
+} from '@app/models';
 import { EstacionamientoDto } from './api/api.dto';
 import { ID_TIPO_VEHICULO, aEstacionamiento, aPayloadEstacionamiento } from './api/api.mapeo';
 import { ESTACIONAMIENTOS_MOCK, ID_PROPIETARIO } from './mocks/datos-mock';

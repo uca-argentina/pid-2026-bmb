@@ -2,8 +2,8 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { RespuestaError } from '../models';
-import { AuthService } from '../services/auth.service';
+import { RespuestaError } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
 /**
  * Normaliza el formato de error de Express (`{ error: { message, details } }`)

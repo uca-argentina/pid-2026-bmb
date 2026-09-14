@@ -15,19 +15,9 @@ import {
   TipoVehiculo,
   Usuario,
   Vehiculo,
-} from '../../models';
-import { DIAS_POR_NUMERO, aInstante, partesLocales } from '../../utils/fecha.util';
-import {
-  CocheraDto,
-  EstacionamientoDto,
-  EstadoReservaDto,
-  FranjaDto,
-  HorarioDto,
-  ReservaDto,
-  SesionDto,
-  UsuarioDto,
-  VehiculoDto,
-} from './api.dto';
+} from '@app/models';
+import { aInstante, DIAS_POR_NUMERO, partesLocales } from '@app/utils/fecha.util';
+import { CocheraDto, EstacionamientoDto, EstadoReservaDto, FranjaDto, HorarioDto, ReservaDto, SesionDto, UsuarioDto, VehiculoDto } from './api.dto';
 
 /*
  * Traduccion entre la API (snake_case, ids de catalogo, instantes ISO) y los
@@ -57,6 +47,7 @@ export function aUsuario(dto: UsuarioDto): Usuario {
     email: dto.email,
     telefono: dto.telefono,
     rol: dto.rol,
+    roles: dto.roles,
     fechaAlta: dto.created_at,
     activo: dto.activo,
   };

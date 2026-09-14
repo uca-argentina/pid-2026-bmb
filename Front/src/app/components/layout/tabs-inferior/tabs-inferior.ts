@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { ItemNavegacion } from '../navegacion.model';
+import { ItemNavegacion } from '@app/components/layout';
 
 /** Tab bar mobile: grilla de columnas iguales, activo con fondo acento. */
 @Component({

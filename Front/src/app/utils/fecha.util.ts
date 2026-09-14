@@ -1,4 +1,4 @@
-import { DiaSemana, FechaHoraISO, FechaISO, HoraHHmm } from '../models';
+import { DiaSemana, FechaHoraISO, FechaISO, HoraHHmm } from '@app/models';
 
 /** Indice 0 = domingo, igual que `Date.getDay()` y que `horario.dia_semana` en la base. */
 export const DIAS_POR_NUMERO: DiaSemana[] = [

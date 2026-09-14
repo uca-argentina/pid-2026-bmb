@@ -1,4 +1,4 @@
-import { EstadoCochera, RolUsuario } from '../../models';
+import { EstadoCochera, RolUsuario } from '@app/models';
 
 /*
  * Forma exacta de las respuestas de la API de Express (snake_case, tal cual
@@ -14,6 +14,7 @@ export interface UsuarioDto {
   apellido: string;
   email: string;
   rol: RolUsuario;
+  roles: RolUsuario[];
   telefono: string | null;
   activo: boolean;
   created_at: string;

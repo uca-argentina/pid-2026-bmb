@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { BarraLateral } from '../../components/layout/barra-lateral/barra-lateral';
-import { ItemNavegacion } from '../../components/layout/navegacion.model';
-import { TabsInferior } from '../../components/layout/tabs-inferior/tabs-inferior';
-import { RolUsuario } from '../../models';
-import { AuthService } from '../../services/auth.service';
+import { BarraLateral, ItemNavegacion, TabsInferior } from '@app/components/layout';
+import { inicioSegunRol } from '@app/guards/rol.guard';
+import { ETIQUETA_ROL, RolUsuario } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
 /** Navegacion de cada rol. El guard ya garantizo que el rol corresponde. */
 const NAVEGACION: Record<RolUsuario, ItemNavegacion[]> = {
@@ -39,6 +38,33 @@ export class LayoutApp {
     const rol = this.auth.rol();
     return rol ? NAVEGACION[rol] : [];
   });
+
+  /** Perfil al que se puede pasar; `null` si el usuario tiene uno solo. */
+  protected readonly rolAlternativo = computed<RolUsuario | null>(() => {
+    const usuario = this.usuario();
+    return usuario?.roles.find((rol) => rol !== usuario.rol) ?? null;
+  });
+
+  protected readonly etiquetaRolAlternativo = computed(() => {
+    const rol = this.rolAlternativo();
+    return rol ? ETIQUETA_ROL[rol] : '';
+  });
+
+  protected readonly cambiandoRol = signal(false);
+
+  protected cambiarRol(): void {
+    const rol = this.rolAlternativo();
+    if (!rol || this.cambiandoRol()) return;
+
+    this.cambiandoRol.set(true);
+    this.auth.cambiarRol(rol).subscribe({
+      next: (sesion) => {
+        this.cambiandoRol.set(false);
+        void this.router.navigateByUrl(inicioSegunRol(sesion.usuario.rol));
+      },
+      error: () => this.cambiandoRol.set(false),
+    });
+  }
 
   protected salir(): void {
     this.auth.logout();

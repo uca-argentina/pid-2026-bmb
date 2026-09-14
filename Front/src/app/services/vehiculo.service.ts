@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { NuevoVehiculo, Vehiculo } from '../models';
+import { environment } from '@env/environment';
+import { NuevoVehiculo, Vehiculo } from '@app/models';
 import { VehiculoDto } from './api/api.dto';
 import { aPayloadVehiculo, aVehiculo } from './api/api.mapeo';
 import { ID_CONDUCTOR, VEHICULOS_MOCK } from './mocks/datos-mock';

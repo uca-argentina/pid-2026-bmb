@@ -1,7 +1,14 @@
 <div class="flex min-h-dvh bg-lienzo">
   <!-- Desktop: nav lateral fija -->
   <div class="sticky top-0 hidden h-dvh lg:block">
-    <app-barra-lateral [items]="items()" [usuario]="usuario()" (salir)="salir()" />
+    <app-barra-lateral
+      [items]="items()"
+      [usuario]="usuario()"
+      [rolAlternativo]="rolAlternativo()"
+      [cambiandoRol]="cambiandoRol()"
+      (salir)="salir()"
+      (cambiarRol)="cambiarRol()"
+    />
   </div>
 
   <div class="flex min-w-0 flex-1 flex-col">
@@ -14,14 +21,27 @@
         <span class="marca-logo !h-6 !w-6 !text-[11px]" aria-hidden="true">P</span>
         <span class="text-[13px] font-semibold tracking-[-0.01em] text-tinta">Parkit</span>
       </span>
-      <button
-        type="button"
-        class="rounded-boton px-2 py-1 text-[12px] font-medium text-plomo transition-colors
-               duration-160 ease-out hover:bg-borde-sutil hover:text-tinta"
-        (click)="salir()"
-      >
-        Salir
-      </button>
+      <span class="flex items-center gap-1">
+        @if (rolAlternativo()) {
+          <button
+            type="button"
+            class="rounded-boton px-2 py-1 text-[12px] font-medium text-acento-fuerte transition-colors
+                   duration-160 ease-out hover:bg-acento-suave disabled:opacity-60"
+            [disabled]="cambiandoRol()"
+            (click)="cambiarRol()"
+          >
+            Perfil {{ etiquetaRolAlternativo() }}
+          </button>
+        }
+        <button
+          type="button"
+          class="rounded-boton px-2 py-1 text-[12px] font-medium text-plomo transition-colors
+                 duration-160 ease-out hover:bg-borde-sutil hover:text-tinta"
+          (click)="salir()"
+        >
+          Salir
+        </button>
+      </span>
     </div>
 
     <main class="flex-1">

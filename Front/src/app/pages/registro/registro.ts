@@ -1,16 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Boton } from '../../components/ui';
-import { inicioSegunRol } from '../../guards/rol.guard';
-import { RegistroUsuario, RolUsuario } from '../../models';
-import { AuthService } from '../../services/auth.service';
+import { Boton } from '@app/components/ui';
+import { inicioSegunRol } from '@app/guards/rol.guard';
+import { RegistroUsuario, RolUsuario } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
 /** Mismos limites que valida el backend (auth.validator.js). */
 const PASSWORD_MIN = 8;
@@ -32,7 +26,11 @@ function destinoTrasRegistro(rol: RolUsuario): string {
   return rol === 'CONDUCTOR' ? '/conductor/vehiculos' : inicioSegunRol(rol);
 }
 
-/** Alta de usuario con rol Conductor o Propietario. */
+/**
+ * Pantalla `/registrarse` · publica
+ *
+ * Alta de usuario eligiendo el rol: Conductor o Propietario.
+ */
 @Component({
   selector: 'app-registro',
   changeDetection: ChangeDetectionStrategy.OnPush,

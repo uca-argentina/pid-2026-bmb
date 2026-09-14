@@ -1,5 +1,5 @@
-import { TonoPunto } from '../components/ui/punto-estado/punto-estado';
-import { DiaSemana, EstadoCochera, FranjaAtencion, HoraHHmm } from '../models';
+import { TonoPunto } from '@app/components/ui';
+import { DiaSemana, EstadoCochera, FranjaAtencion, HoraHHmm } from '@app/models';
 import { aFechaISO, diaSemanaDe } from './fecha.util';
 
 /**

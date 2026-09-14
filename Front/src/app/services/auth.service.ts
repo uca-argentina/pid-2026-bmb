@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { Credenciales, RegistroUsuario, RolUsuario, SesionAuth, Usuario } from '../models';
+import { environment } from '@env/environment';
+import { Credenciales, RegistroUsuario, RolUsuario, SesionAuth, Usuario } from '@app/models';
 import { SesionDto, UsuarioDto } from './api/api.dto';
 import { aPayloadRegistro, aSesion, aUsuario } from './api/api.mapeo';
 import { USUARIOS_MOCK } from './mocks/datos-mock';
@@ -61,6 +61,7 @@ export class AuthService {
         email: datos.email,
         telefono: datos.telefono ?? null,
         rol: datos.rol,
+        roles: [datos.rol],
         fechaAlta: new Date().toISOString(),
         activo: true,
       };
@@ -87,6 +88,24 @@ export class AuthService {
       .pipe(map((respuesta) => aUsuario(respuesta.usuario)));
   }
 
+  /** `POST /api/auth/rol`: cambia el perfil activo y reemplaza el token. */
+  cambiarRol(rol: RolUsuario): Observable<SesionAuth> {
+    if (environment.usarMocks) {
+      const sesion = this.sesion();
+      if (!sesion || !sesion.usuario.roles.includes(rol)) {
+        return simularError<SesionAuth>(`El usuario no tiene habilitado el perfil ${rol}`);
+      }
+      return simular<SesionAuth>({ ...sesion, usuario: { ...clonar(sesion.usuario), rol } }).pipe(
+        tap((nueva) => this.guardarSesion(nueva)),
+      );
+    }
+
+    return this.http.post<SesionDto>(`${this.ruta}/rol`, { rol }).pipe(
+      map(aSesion),
+      tap((sesion) => this.guardarSesion(sesion)),
+    );
+  }
+
   logout(): void {
     this.sesion.set(null);
     localStorage.removeItem(CLAVE_SESION);
@@ -100,7 +119,11 @@ export class AuthService {
   private leerSesionGuardada(): SesionAuth | null {
     try {
       const crudo = localStorage.getItem(CLAVE_SESION);
-      return crudo ? (JSON.parse(crudo) as SesionAuth) : null;
+      if (!crudo) return null;
+      const sesion = JSON.parse(crudo) as SesionAuth;
+      // Sesiones guardadas antes de que existiera `roles`.
+      sesion.usuario.roles ??= [sesion.usuario.rol];
+      return sesion;
     } catch {
       return null;
     }

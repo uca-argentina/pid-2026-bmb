@@ -1,0 +1,54 @@
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import {
+  esReservaActiva,
+  EstadoReserva,
+  ETIQUETA_ESTADO_RESERVA,
+  ReservaDetallada,
+} from '@app/models';
+import { desdeFechaISO } from '@app/utils/fecha.util';
+import { Boton, Etiqueta, TonoEtiqueta } from '@app/components/ui';
+
+/** El color del badge adelanta el estado antes de leer la palabra. */
+const TONO_ESTADO: Record<EstadoReserva, TonoEtiqueta> = {
+  PENDIENTE: 'aviso',
+  CONFIRMADA: 'acento',
+  EN_CURSO: 'exito',
+  FINALIZADA: 'neutro',
+  CANCELADA: 'peligro',
+};
+
+/**
+ * Fila de reserva dentro de una tarjeta con `overflow: hidden`.
+ * `vista` decide que datos van al frente: la cochera y la patente para el
+ * propietario, el estacionamiento y la fecha para el conductor.
+ */
+@Component({
+  selector: 'app-fila-reserva',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DatePipe, Etiqueta, Boton],
+  templateUrl: './fila-reserva.html',
+  // La fila lleva su divisor arriba. Cuando es la primera de la tarjeta ese
+  // divisor se solapa con el borde de la tarjeta, asi que se suprime.
+  host: { class: 'block first:[&>div]:border-t-0' },
+})
+export class FilaReserva {
+  readonly reserva = input.required<ReservaDetallada>();
+  readonly vista = input<'CONDUCTOR' | 'PROPIETARIO'>('PROPIETARIO');
+  readonly permiteCancelar = input(false);
+
+  readonly cancelar = output<ReservaDetallada>();
+
+  protected readonly etiquetaEstado = ETIQUETA_ESTADO_RESERVA;
+  protected readonly activa = computed(() => esReservaActiva(this.reserva()));
+  protected readonly tonoEstado = computed(() => TONO_ESTADO[this.reserva().estado]);
+
+  protected readonly titulo = computed(() => {
+    const reserva = this.reserva();
+    if (this.vista() === 'CONDUCTOR') return reserva.estacionamiento.nombre;
+    const cochera = reserva.cochera?.identificador ?? 'Sin asignar';
+    return `${cochera} · ${reserva.vehiculo.patente}`;
+  });
+
+  protected readonly fecha = computed(() => desdeFechaISO(this.reserva().fecha));
+}

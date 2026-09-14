@@ -1,5 +1,5 @@
-import { aFechaISO } from '../../utils/fecha.util';
-import { Cochera, EstadoCochera, Estacionamiento, Reserva, Usuario, Vehiculo } from '../../models';
+import { aFechaISO } from '@app/utils/fecha.util';
+import { Cochera, Estacionamiento, EstadoCochera, Reserva, Usuario, Vehiculo } from '@app/models';
 
 /* -------------------------------------------------------------------------
    Datos de ejemplo tomados del handoff de diseno ("Claude design/README.md"),
@@ -23,6 +23,7 @@ export const USUARIOS_MOCK: Usuario[] = [
     email: 'conductor@parkit.com',
     telefono: '+54 9 11 5555 1234',
     rol: 'CONDUCTOR',
+    roles: ['CONDUCTOR'],
     fechaAlta: '2026-02-11T13:20:00.000Z',
     activo: true,
   },
@@ -33,6 +34,7 @@ export const USUARIOS_MOCK: Usuario[] = [
     email: 'propietario@parkit.com',
     telefono: '+54 9 11 4444 8899',
     rol: 'PROPIETARIO',
+    roles: ['PROPIETARIO'],
     fechaAlta: '2025-11-03T09:00:00.000Z',
     activo: true,
   },

@@ -2,13 +2,21 @@ import { FechaHoraISO, Id } from './api.model';
 
 export type RolUsuario = 'CONDUCTOR' | 'PROPIETARIO';
 
+export const ETIQUETA_ROL: Record<RolUsuario, string> = {
+  CONDUCTOR: 'Conductor',
+  PROPIETARIO: 'Propietario',
+};
+
 export interface Usuario {
   id: Id;
   nombre: string;
   apellido: string;
   email: string;
   telefono: string | null;
+  /** Perfil activo de la sesion: define que rama de rutas se ve. */
   rol: RolUsuario;
+  /** Perfiles habilitados. Con mas de uno, el usuario puede alternar entre ellos. */
+  roles: RolUsuario[];
   fechaAlta: FechaHoraISO;
   activo: boolean;
 }

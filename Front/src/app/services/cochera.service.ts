@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { Cochera, EstadoCochera, Id, NuevaCochera } from '../models';
+import { environment } from '@env/environment';
+import { Cochera, EstadoCochera, Id, NuevaCochera } from '@app/models';
 import { CocheraDto } from './api/api.dto';
 import { aCochera, aPayloadCambiosCochera, aPayloadCochera } from './api/api.mapeo';
 import { COCHERAS_MOCK } from './mocks/datos-mock';

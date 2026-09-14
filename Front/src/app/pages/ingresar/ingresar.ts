@@ -1,12 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Boton } from '../../components/ui';
-import { inicioSegunRol } from '../../guards/rol.guard';
-import { Credenciales, RolUsuario } from '../../models';
-import { AuthService } from '../../services/auth.service';
+import { Boton } from '@app/components/ui';
+import { inicioSegunRol } from '@app/guards/rol.guard';
+import { Credenciales, RolUsuario } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
-/** Ingreso a la app. Define que rama de rutas ve el usuario. */
+/**
+ * Pantalla `/ingresar` · publica
+ *
+ * Ingreso a la app: el rol de la sesion define que rama de rutas ve el usuario.
+ */
 @Component({
   selector: 'app-ingresar',
   changeDetection: ChangeDetectionStrategy.OnPush,
