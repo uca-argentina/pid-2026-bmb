@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { CeldaCochera } from '../../components/celda-cochera/celda-cochera';
 import { FilaReserva } from '../../components/fila-reserva/fila-reserva';
 import { Kpi } from '../../components/kpi/kpi';
@@ -27,6 +28,7 @@ import { aFechaISO } from '../../utils/fecha.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DatePipe,
+    RouterLink,
     CeldaCochera,
     LeyendaCocheras,
     FilaReserva,

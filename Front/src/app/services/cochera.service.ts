@@ -4,7 +4,7 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Cochera, EstadoCochera, Id, NuevaCochera } from '../models';
 import { CocheraDto } from './api/api.dto';
-import { aCochera, aPayloadCochera } from './api/api.mapeo';
+import { aCochera, aPayloadCambiosCochera, aPayloadCochera } from './api/api.mapeo';
 import { COCHERAS_MOCK } from './mocks/datos-mock';
 import { clonar, simular } from './mocks/mock.util';
 
@@ -22,19 +22,6 @@ export class CocheraService {
     return this.http
       .get<{ cocheras: CocheraDto[] }>(rutaCocheras(estacionamientoId))
       .pipe(map(({ cocheras }) => cocheras.map(aCochera)));
-  }
-
-  /** `PATCH /api/estacionamientos/:id/cocheras/:idCochera` */
-  cambiarEstado(cochera: Cochera, estado: EstadoCochera): Observable<Cochera> {
-    if (environment.usarMocks) {
-      return simular({ ...clonar(cochera), estado });
-    }
-
-    return this.http
-      .patch<{ cochera: CocheraDto }>(`${rutaCocheras(cochera.estacionamientoId)}/${cochera.id}`, {
-        estado_actual: estado,
-      })
-      .pipe(map((respuesta) => aCochera(respuesta.cochera)));
   }
 
   /** `POST /api/estacionamientos/:id/cocheras` */
@@ -55,8 +42,45 @@ export class CocheraService {
       .post<{ cochera: CocheraDto }>(rutaCocheras(datos.estacionamientoId), aPayloadCochera(datos))
       .pipe(map((respuesta) => aCochera(respuesta.cochera)));
   }
+
+  /** `PATCH /api/estacionamientos/:id/cocheras/:idCochera` */
+  actualizar(cochera: Cochera, cambios: Partial<NuevaCochera>): Observable<Cochera> {
+    if (environment.usarMocks) {
+      return simular<Cochera>({
+        ...clonar(cochera),
+        identificador: cambios.identificador ?? cochera.identificador,
+        sector: cambios.sector ?? cochera.sector,
+        tipoVehiculo: cambios.tipoVehiculo ?? cochera.tipoVehiculo,
+        cubierta: cambios.cubierta ?? cochera.cubierta,
+        estado: cambios.estado ?? cochera.estado,
+      });
+    }
+
+    return this.http
+      .patch<{ cochera: CocheraDto }>(rutaCochera(cochera), aPayloadCambiosCochera(cambios))
+      .pipe(map((respuesta) => aCochera(respuesta.cochera)));
+  }
+
+  cambiarEstado(cochera: Cochera, estado: EstadoCochera): Observable<Cochera> {
+    return this.actualizar(cochera, { estado });
+  }
+
+  /** `DELETE /api/estacionamientos/:id/cocheras/:idCochera` (baja logica) */
+  darDeBaja(cochera: Cochera): Observable<Cochera> {
+    if (environment.usarMocks) {
+      return simular<Cochera>({ ...clonar(cochera), estado: 'INACTIVA' });
+    }
+
+    return this.http
+      .delete<{ cochera: CocheraDto }>(rutaCochera(cochera))
+      .pipe(map((respuesta) => aCochera(respuesta.cochera)));
+  }
 }
 
 function rutaCocheras(estacionamientoId: Id): string {
   return `/estacionamientos/${estacionamientoId}/cocheras`;
+}
+
+function rutaCochera(cochera: Cochera): string {
+  return `${rutaCocheras(cochera.estacionamientoId)}/${cochera.id}`;
 }

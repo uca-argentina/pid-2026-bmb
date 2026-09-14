@@ -170,6 +170,16 @@ export function aPayloadCochera(datos: NuevaCochera) {
   };
 }
 
+export function aPayloadCambiosCochera(cambios: Partial<NuevaCochera>) {
+  return {
+    identificador: cambios.identificador,
+    id_tipo_vehiculo: cambios.tipoVehiculo && ID_TIPO_VEHICULO[cambios.tipoVehiculo],
+    sector: cambios.sector || undefined,
+    cubierta: cambios.cubierta,
+    estado_actual: cambios.estado,
+  };
+}
+
 /* -------------------------------- vehiculo -------------------------------- */
 
 export function aVehiculo(dto: VehiculoDto): Vehiculo {

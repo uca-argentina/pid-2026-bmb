@@ -78,6 +78,28 @@ export const routes: Routes = [
             (m) => m.ReservasEstacionamiento,
           ),
       },
+      {
+        path: 'estacionamientos',
+        title: 'Parkit · Mis estacionamientos',
+        loadComponent: () =>
+          import('./pages/mis-estacionamientos/mis-estacionamientos').then(
+            (m) => m.MisEstacionamientos,
+          ),
+      },
+      {
+        path: 'estacionamientos/nuevo',
+        title: 'Parkit · Nuevo estacionamiento',
+        loadComponent: () =>
+          import('./pages/alta-estacionamiento/alta-estacionamiento').then(
+            (m) => m.AltaEstacionamiento,
+          ),
+      },
+      {
+        path: 'estacionamientos/:estacionamientoId/cocheras',
+        title: 'Parkit · Cocheras',
+        loadComponent: () =>
+          import('./pages/gestion-cocheras/gestion-cocheras').then((m) => m.GestionCocheras),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'tablero' },
     ],
   },

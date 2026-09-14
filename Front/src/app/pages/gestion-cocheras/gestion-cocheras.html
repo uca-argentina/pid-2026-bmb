@@ -1,0 +1,146 @@
+<div class="mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header>
+      <a
+        class="inline-flex items-center gap-1.5 rounded-boton text-[12px] font-medium text-plomo
+               transition-colors duration-160 ease-out hover:text-acento"
+        routerLink="/propietario/estacionamientos"
+      >
+        ← Mis estacionamientos
+      </a>
+      <p class="eyebrow mt-3">Cocheras</p>
+      <h1 class="titulo-vista mt-1.5">
+        {{ recursoEstacionamiento.value()?.nombre ?? 'Estacionamiento' }}
+      </h1>
+      @if (!recursoCocheras.isLoading()) {
+        <p class="num-tabular mt-1.5 text-[13.5px] text-plomo">{{ activas() }} cocheras activas</p>
+      }
+    </header>
+
+    <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+      <section class="flex flex-col gap-3" aria-labelledby="titulo-listado">
+        <h2 id="titulo-listado" class="label-campo">Cargadas</h2>
+
+        @if (recursoCocheras.isLoading()) {
+          <ui-cargando [cantidad]="2" />
+        } @else if (recursoCocheras.error(); as error) {
+          <ui-estado-vacio titulo="No pudimos cargar las cocheras" [descripcion]="error.message">
+            <ui-boton (presionado)="recursoCocheras.reload()">Reintentar</ui-boton>
+          </ui-estado-vacio>
+        } @else if (recursoCocheras.value().length === 0) {
+          <ui-estado-vacio
+            titulo="Este estacionamiento no tiene cocheras"
+            descripcion="Agregá la primera con el formulario."
+          />
+        } @else {
+          <ui-tarjeta relleno="ninguno" [recortar]="true">
+            <ul>
+              @for (cochera of recursoCocheras.value(); track cochera.id) {
+                <li
+                  class="flex flex-wrap items-center justify-between gap-3 border-t border-borde-sutil
+                         px-5 py-[13px] first:border-t-0 lg:px-6"
+                  [class.bg-acento-suave]="editando()?.id === cochera.id"
+                >
+                  <div class="min-w-0">
+                    <p class="num-tabular text-[14px] font-semibold text-tinta">
+                      {{ cochera.identificador }}
+                    </p>
+                    <p class="mt-0.5 text-[12px] text-plomo">{{ detalle(cochera) }}</p>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <ui-etiqueta [tono]="tonoEstado[cochera.estado]">
+                      {{ etiquetaEstado[cochera.estado] }}
+                    </ui-etiqueta>
+                    @if (cochera.estado !== 'INACTIVA') {
+                      <ui-boton tamano="sm" variante="fantasma" (presionado)="editar(cochera)">
+                        Editar
+                      </ui-boton>
+                      <ui-boton tamano="sm" variante="peligro" (presionado)="darDeBaja(cochera)">
+                        Dar de baja
+                      </ui-boton>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          </ui-tarjeta>
+        }
+      </section>
+
+      <section class="order-first lg:order-last" aria-labelledby="titulo-formulario">
+        <ui-tarjeta relleno="lg">
+          <form class="flex flex-col gap-4" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+            <h2 id="titulo-formulario" class="text-[15px] font-semibold text-tinta">
+              @if (editando(); as cochera) {
+                Editar cochera {{ cochera.identificador }}
+              } @else {
+                Agregar cochera
+              }
+            </h2>
+
+            <div class="grid grid-cols-2 gap-3">
+              <label class="campo">
+                <span class="label-campo">Identificador</span>
+                <input class="uppercase" type="text" formControlName="identificador" placeholder="A1" />
+                @if (invalido('identificador')) {
+                  <span class="campo-error">Hasta 20 caracteres.</span>
+                }
+              </label>
+              <label class="campo">
+                <span class="label-campo">Sector <span class="font-normal text-plomo">(opcional)</span></span>
+                <input type="text" formControlName="sector" placeholder="A" />
+              </label>
+            </div>
+
+            <div class="flex flex-col gap-1.5" role="group" aria-labelledby="etiqueta-tipo">
+              <span id="etiqueta-tipo" class="label-campo">Tipo de vehículo</span>
+              <div class="flex flex-wrap gap-2">
+                @for (tipo of tipos; track tipo) {
+                  <ui-chip
+                    [activo]="formulario.controls.tipo.value === tipo"
+                    (alternar)="elegirTipo(tipo)"
+                  >
+                    {{ etiquetaTipo[tipo] }}
+                  </ui-chip>
+                }
+              </div>
+            </div>
+
+            <label class="flex items-center gap-2.5 text-[13px] text-grafito">
+              <input class="size-4 shrink-0 accent-acento" type="checkbox" formControlName="cubierta" />
+              Es cubierta
+            </label>
+
+            @if (error(); as mensaje) {
+              <p
+                class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px] text-ocupada"
+                role="alert"
+              >
+                {{ mensaje }}
+              </p>
+            }
+
+            @if (aviso(); as mensaje) {
+              <p
+                class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px] text-exito"
+                role="status"
+              >
+                {{ mensaje }}
+              </p>
+            }
+
+            <div class="flex flex-col gap-2">
+              <ui-boton variante="primario" tipo="submit" [bloque]="true" [cargando]="enviando()">
+                {{ editando() ? 'Guardar cambios' : 'Agregar cochera' }}
+              </ui-boton>
+              @if (editando()) {
+                <ui-boton [bloque]="true" (presionado)="cancelarEdicion()">Cancelar</ui-boton>
+              }
+            </div>
+          </form>
+        </ui-tarjeta>
+      </section>
+    </div>
+  </div>
+</div>
