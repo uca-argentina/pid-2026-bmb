@@ -5,14 +5,32 @@
       <h1 class="titulo-vista mt-1.5">Mis reservas</h1>
 
       <div class="mt-4 flex gap-2">
-        <ui-chip [activo]="pestania() === 'VIGENTES'" (alternar)="pestania.set('VIGENTES')">
+        <ui-chip [activo]="pestania() === 'VIGENTES'" (alternar)="cambiarPestania('VIGENTES')">
           Vigentes
         </ui-chip>
-        <ui-chip [activo]="pestania() === 'HISTORIAL'" (alternar)="pestania.set('HISTORIAL')">
+        <ui-chip [activo]="pestania() === 'HISTORIAL'" (alternar)="cambiarPestania('HISTORIAL')">
           Historial
         </ui-chip>
       </div>
     </header>
+
+    @if (aviso(); as mensaje) {
+      <p
+        class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px] text-exito"
+        role="status"
+      >
+        {{ mensaje }} La vas a encontrar en Historial.
+      </p>
+    }
+
+    @if (error(); as mensaje) {
+      <p
+        class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px] text-ocupada"
+        role="alert"
+      >
+        No pudimos cancelar la reserva: {{ mensaje }}
+      </p>
+    }
 
     @if (recurso.isLoading()) {
       <ui-cargando [cantidad]="2" />
@@ -34,6 +52,7 @@
             [reserva]="reserva"
             vista="CONDUCTOR"
             [permiteCancelar]="true"
+            [cancelando]="cancelandoId() === reserva.id"
             (cancelar)="cancelar($event)"
           />
         }

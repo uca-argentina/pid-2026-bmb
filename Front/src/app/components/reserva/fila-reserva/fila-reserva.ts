@@ -36,6 +36,8 @@ export class FilaReserva {
   readonly reserva = input.required<ReservaDetallada>();
   readonly vista = input<'CONDUCTOR' | 'PROPIETARIO'>('PROPIETARIO');
   readonly permiteCancelar = input(false);
+  /** Muestra el spinner en el boton mientras se cancela esta reserva. */
+  readonly cancelando = input(false);
 
   readonly cancelar = output<ReservaDetallada>();
 
