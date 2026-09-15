@@ -27,11 +27,17 @@ export class EstacionamientoService {
       );
     }
 
-    return this.http.get<Estacionamiento[]>(this.ruta, { params: aParams(filtros) });
+    return this.http
+      .get<{ estacionamientos: Estacionamiento[] } | Estacionamiento[]>(this.ruta, {
+        params: aParams(filtros),
+      })
+      .pipe(
+        map((res) => (Array.isArray(res) ? res : res.estacionamientos ?? [])),
+      );
   }
 
   /** `GET /api/estacionamientos/:id` */
-  obtener(id: Id): Observable<Estacionamiento> {
+  obtener(id: Id): Observable<any> {
     if (environment.usarMocks) {
       const encontrado = ESTACIONAMIENTOS_MOCK.find((e) => e.id === id);
       return encontrado
@@ -39,22 +45,26 @@ export class EstacionamientoService {
         : simularError<Estacionamiento>('Estacionamiento no encontrado');
     }
 
-    return this.http.get<Estacionamiento>(`${this.ruta}/${id}`);
+    return this.http.get<any>(`${this.ruta}/${id}`).pipe(
+      map((res) => res.estacionamiento ?? res)
+    );
   }
 
   /** `GET /api/estacionamientos?propietarioId=:id` */
-  listarDelPropietario(propietarioId: Id): Observable<Estacionamiento[]> {
+  listarDelPropietario(propietarioId: Id): Observable<any[]> {
     if (environment.usarMocks) {
       return simular(clonar(ESTACIONAMIENTOS_MOCK.filter((e) => e.propietarioId === propietarioId)));
     }
 
-    return this.http.get<Estacionamiento[]>(this.ruta, {
+    return this.http.get<any>(this.ruta, {
       params: new HttpParams().set('propietarioId', propietarioId),
-    });
+    }).pipe(
+      map((res) => (Array.isArray(res) ? res : res.estacionamientos ?? []))
+    );
   }
 
   /** `POST /api/estacionamientos` */
-  crear(datos: NuevoEstacionamiento): Observable<Estacionamiento> {
+  crear(datos: NuevoEstacionamiento): Observable<any> {
     if (environment.usarMocks) {
       return simular<Estacionamiento>({
         ...datos,
@@ -66,7 +76,9 @@ export class EstacionamientoService {
       });
     }
 
-    return this.http.post<Estacionamiento>(this.ruta, datos);
+    return this.http.post<any>(this.ruta, datos).pipe(
+      map((res) => res.estacionamiento ?? res)
+    );
   }
 
   /** `GET /api/estacionamientos/:id/resumen-diario` (KPIs del panel). */

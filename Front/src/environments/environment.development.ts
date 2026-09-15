@@ -9,6 +9,6 @@ export const environment = {
    * Mientras el backend no tenga endpoints, los servicios responden con datos
    * mockeados. Poner en `false` para pegarle a Express sin tocar nada mas.
    */
-  usarMocks: true,
+  usarMocks: false,
   latenciaMockMs: 350,
 };

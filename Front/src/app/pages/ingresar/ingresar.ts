@@ -29,8 +29,8 @@ export class Ingresar {
 
   /** Accesos de demostracion mientras los servicios corren con mocks. */
   protected readonly demos: { rol: RolUsuario; etiqueta: string; email: string }[] = [
-    { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@ucaio.com' },
-    { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@ucaio.com' },
+    { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@test.com' },
+    { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@test.com' },
   ];
 
   protected enviar(): void {
