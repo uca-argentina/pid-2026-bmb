@@ -35,8 +35,8 @@ export class Ingresar {
    * `npm run db:demo` en el backend.
    */
   protected readonly demos: { rol: RolUsuario; etiqueta: string; email: string }[] = [
-    { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@parkit.com' },
-    { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@parkit.com' },
+    { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@test.com' },
+    { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@test.com' },
   ];
 
   protected enviar(): void {
