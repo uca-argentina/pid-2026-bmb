@@ -1,0 +1,60 @@
+<div class="mx-auto w-full max-w-[560px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header>
+      <a
+        class="inline-flex items-center gap-1.5 rounded-boton text-[12px] font-medium
+               text-plomo transition-colors duration-160 ease-out hover:text-acento"
+        routerLink="/conductor/vehiculos"
+      >
+        ← Volver a mis vehículos
+      </a>
+      <p class="eyebrow mt-3">Conductor</p>
+      <h1 class="titulo-vista mt-1.5">Editar vehículo</h1>
+    </header>
+
+    @if (recurso.isLoading()) {
+      <ui-cargando [cantidad]="1" />
+    } @else if (recurso.error(); as error) {
+      <ui-estado-vacio titulo="No pudimos cargar el vehículo" [descripcion]="error.message">
+        <ui-boton (presionado)="recurso.reload()">Reintentar</ui-boton>
+      </ui-estado-vacio>
+    } @else if (recurso.value(); as vehiculo) {
+      <ui-tarjeta relleno="lg">
+        <app-formulario-vehiculo
+          textoEnviar="Guardar cambios"
+          [vehiculo]="vehiculo"
+          [enviando]="enviando()"
+          [error]="error()"
+          (guardar)="guardar($event)"
+        />
+      </ui-tarjeta>
+
+      <section
+        class="flex flex-col gap-3 rounded-tarjeta border border-ocupada/20 bg-ocupada/[0.03]
+               px-5 py-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
+        aria-labelledby="titulo-eliminar"
+      >
+        <div>
+          <h2 id="titulo-eliminar" class="text-[14px] font-semibold text-tinta">
+            Eliminar vehículo
+          </h2>
+          <p class="mt-0.5 text-[13px] text-plomo">
+            Dejará de aparecer en tus vehículos y no se podrá usar en nuevas reservas.
+          </p>
+        </div>
+        <ui-boton variante="peligro" [cargando]="borrando()" (presionado)="eliminar()">
+          Eliminar
+        </ui-boton>
+      </section>
+    } @else {
+      <ui-estado-vacio
+        titulo="Ese vehículo no existe"
+        descripcion="Puede que lo hayas eliminado o que el enlace esté mal."
+      >
+        <ui-boton variante="primario" routerLink="/conductor/vehiculos">
+          Ir a mis vehículos
+        </ui-boton>
+      </ui-estado-vacio>
+    }
+  </div>
+</div>

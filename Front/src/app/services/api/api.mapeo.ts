@@ -8,6 +8,7 @@ import {
   NuevaCochera,
   NuevaReserva,
   NuevoEstacionamiento,
+  CambiosVehiculo,
   NuevoVehiculo,
   RegistroUsuario,
   ReservaDetallada,
@@ -195,6 +196,18 @@ export function aPayloadVehiculo(datos: NuevoVehiculo) {
     modelo: datos.modelo,
     color: datos.color,
     predeterminado: datos.predeterminado,
+  };
+}
+
+/** Solo viajan los campos presentes: lo que el editor no toco queda `undefined`. */
+export function aPayloadCambiosVehiculo(cambios: CambiosVehiculo) {
+  return {
+    patente: cambios.patente,
+    id_tipo_vehiculo: cambios.tipo && ID_TIPO_VEHICULO[cambios.tipo],
+    marca: cambios.marca,
+    modelo: cambios.modelo,
+    color: cambios.color,
+    predeterminado: cambios.predeterminado,
   };
 }
 

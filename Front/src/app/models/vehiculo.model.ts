@@ -32,3 +32,17 @@ export interface NuevoVehiculo {
   color?: string | null;
   predeterminado?: boolean;
 }
+
+/**
+ * Payload de `PATCH /api/vehiculos/:id`: los mismos campos que el alta, todos
+ * opcionales porque el editor manda solo lo que cambio. `NuevoVehiculo` es
+ * asignable a este tipo, asi que el formulario compartido puede emitir uno solo.
+ */
+export interface CambiosVehiculo {
+  patente?: string;
+  tipo?: TipoVehiculo;
+  marca?: string | null;
+  modelo?: string | null;
+  color?: string | null;
+  predeterminado?: boolean;
+}

@@ -57,6 +57,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/conductor/vehiculos/vehiculos').then((m) => m.Vehiculos),
       },
+      {
+        path: 'vehiculos/nuevo',
+        title: 'Parkit · Nuevo vehículo',
+        loadComponent: () =>
+          import('./pages/conductor/alta-vehiculo/alta-vehiculo').then((m) => m.AltaVehiculo),
+      },
+      {
+        path: 'vehiculos/:vehiculoId/editar',
+        title: 'Parkit · Editar vehículo',
+        loadComponent: () =>
+          import('./pages/conductor/editar-vehiculo/editar-vehiculo').then((m) => m.EditarVehiculo),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'explorar' },
     ],
   },
