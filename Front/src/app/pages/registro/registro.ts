@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -34,7 +35,7 @@ function destinoTrasRegistro(rol: RolUsuario): string {
 @Component({
   selector: 'app-registro',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, Boton],
+  imports: [ReactiveFormsModule, RouterLink, Boton, NgOptimizedImage],
   templateUrl: './registro.html',
   styleUrl: './registro.css',
 })

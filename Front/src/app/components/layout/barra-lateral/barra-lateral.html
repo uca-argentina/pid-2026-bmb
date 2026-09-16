@@ -1,9 +1,6 @@
 <aside class="flex h-full w-[238px] flex-col gap-7 border-r border-borde bg-papel px-[18px] py-[26px]">
   <div class="px-2">
-    <div class="flex items-center gap-2.5">
-      <span class="marca-logo" aria-hidden="true">P</span>
-      <p class="text-[16px] leading-none font-semibold tracking-[-0.01em] text-tinta">Parkit</p>
-    </div>
+    <ui-logo [tamano]="30" />
     <p class="mt-2.5 text-[11.5px] leading-tight text-humo">Gestión de estacionamientos</p>
   </div>
 
@@ -12,12 +9,13 @@
       @for (item of items(); track item.ruta) {
         <li>
           <a
-            class="block rounded-boton px-3.5 py-[11px] text-left text-[13px] font-medium text-plomo
-                   transition-[background-color,box-shadow,color] duration-160 ease-out
-                   hover:bg-acento-suave hover:text-acento-fuerte"
+            class="flex items-center gap-3 rounded-boton px-3.5 py-[11px] text-left text-[13px]
+                   font-medium text-plomo transition-[background-color,box-shadow,color]
+                   duration-160 ease-out hover:bg-acento-suave hover:text-acento-fuerte"
             [routerLink]="item.ruta"
             routerLinkActive="bg-acento text-white font-semibold shadow-elevada hover:bg-acento hover:text-white"
           >
+            <ui-icono [nombre]="item.icono" [tamano]="19" />
             {{ item.etiqueta }}
           </a>
         </li>

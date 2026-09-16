@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ItemNavegacion } from '@app/components/layout';
+import { Icono } from '@app/components/ui';
 
 /** Tab bar mobile: grilla de columnas iguales, activo con fondo acento. */
 @Component({
   selector: 'app-tabs-inferior',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, Icono],
   template: `
     <nav
       class="border-t border-borde bg-papel/85 px-4 pt-2.5 pb-[22px] backdrop-blur-md"
@@ -16,11 +17,13 @@ import { ItemNavegacion } from '@app/components/layout';
         @for (item of items(); track item.ruta) {
           <li>
             <a
-              class="block rounded-boton px-1.5 py-2.5 text-center text-[12px] font-semibold
-                     text-plomo transition-[background-color,box-shadow,color] duration-160 ease-out"
+              class="flex flex-col items-center gap-1 rounded-boton px-1.5 py-2 text-center
+                     text-[11px] font-semibold text-plomo
+                     transition-[background-color,box-shadow,color] duration-160 ease-out"
               [routerLink]="item.ruta"
               routerLinkActive="bg-acento text-white shadow-elevada"
             >
+              <ui-icono [nombre]="item.icono" [tamano]="21" />
               {{ item.etiqueta }}
             </a>
           </li>

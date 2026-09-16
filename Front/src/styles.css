@@ -183,26 +183,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Marca: cuadrado del acento con la inicial, usada en login, sidebar y
-     header mobile. Reemplaza al texto suelto "Parkit". */
-  .marca-logo {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    border-radius: 8px;
-    background: linear-gradient(
-      140deg,
-      var(--color-acento) 0%,
-      var(--color-acento-fuerte) 100%
-    );
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-
   /* Barrido de los skeletons de carga. */
   .esqueleto {
     background: linear-gradient(

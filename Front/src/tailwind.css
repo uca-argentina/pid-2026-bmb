@@ -47,18 +47,21 @@
   --color-plomo: #64748b;
   --color-humo: #94a3b8;
 
-  /* Acento de marca */
-  --color-acento: #4f46e5;
-  --color-acento-fuerte: #4338ca;
-  --color-acento-suave: #eef2ff;
-  --color-acento-borde: #c7d2fe;
+  /* Acento de marca: el azul del logo de Parkit (la "P" del pin). Cambiando
+     esta terna se retinta toda la app (nav y chips activos, boton primario,
+     eyebrow, foco, punto "Libre"). */
+  --color-acento: #1e3a5f;
+  --color-acento-fuerte: #142a45;
+  --color-acento-suave: #eaf0f7;
+  --color-acento-borde: #c2d4e8;
 
-  /* Estados */
+  /* Estados. El verde (`exito`) es el otro color de la marca —el del check y
+     la "it"— y por eso se usa tambien como acento secundario. */
   --color-ocupada: #dc2626;
   --color-baja: #d97706;
   --color-reservada: #7c8aa0;
-  --color-exito: #059669;
-  --color-exito-suave: #ecfdf5;
+  --color-exito: #12b76a;
+  --color-exito-suave: #e7f9f0;
 
   --font-sans: 'Inter', system-ui, sans-serif;
 

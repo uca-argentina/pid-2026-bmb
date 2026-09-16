@@ -17,10 +17,7 @@
       class="sticky top-0 z-10 flex items-center justify-between border-b border-borde-sutil
              bg-lienzo/85 px-6 py-3 backdrop-blur-md lg:hidden"
     >
-      <span class="flex items-center gap-2">
-        <span class="marca-logo !h-6 !w-6 !text-[11px]" aria-hidden="true">P</span>
-        <span class="text-[13px] font-semibold tracking-[-0.01em] text-tinta">Parkit</span>
-      </span>
+      <ui-logo [tamano]="24" />
       <span class="flex items-center gap-1">
         @if (rolAlternativo()) {
           <button

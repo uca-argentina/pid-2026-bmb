@@ -9,6 +9,6 @@ export const environment = {
    * `false`: los servicios le pegan al backend real (correr `npm run db:demo`
    * para tener los usuarios de prueba). `true`: datos mockeados, sin backend.
    */
-  usarMocks: false,
+  usarMocks: true,
   latenciaMockMs: 350,
 };
