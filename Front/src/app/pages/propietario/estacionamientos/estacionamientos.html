@@ -37,7 +37,9 @@
                     {{ direccionCorta(estacionamiento.direccion) }}
                   </p>
                 </div>
-                @if (estacionamiento.publicado) {
+                @if (!estacionamiento.activo) {
+                  <ui-etiqueta tono="peligro">Dado de baja</ui-etiqueta>
+                } @else if (estacionamiento.publicado) {
                   <ui-etiqueta tono="exito">Publicado</ui-etiqueta>
                 } @else {
                   <ui-etiqueta>Sin publicar</ui-etiqueta>
@@ -49,12 +51,18 @@
                 $ {{ estacionamiento.precioPorHora.toLocaleString('es-AR') }} por hora
               </p>
 
-              <div class="mt-auto">
+              <div class="mt-auto flex gap-2">
                 <ui-boton
                   tamano="sm"
                   [routerLink]="['/propietario/estacionamientos', estacionamiento.id, 'cocheras']"
                 >
                   Cocheras
+                </ui-boton>
+                <ui-boton
+                  tamano="sm"
+                  [routerLink]="['/propietario/estacionamientos', estacionamiento.id, 'editar']"
+                >
+                  Editar
                 </ui-boton>
               </div>
             </div>

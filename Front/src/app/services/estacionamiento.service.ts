@@ -94,6 +94,30 @@ export class EstacionamientoService {
       .post<{ estacionamiento: EstacionamientoDto }>(this.ruta, aPayloadEstacionamiento(datos))
       .pipe(map(({ estacionamiento }) => aEstacionamiento(estacionamiento)));
   }
+
+  /** `PATCH /api/estacionamientos/:id`. Manda el formulario completo. */
+  actualizar(id: Id, datos: NuevoEstacionamiento): Observable<Estacionamiento> {
+    return this.http
+      .patch<{ estacionamiento: EstacionamientoDto }>(
+        `${this.ruta}/${id}`,
+        aPayloadEstacionamiento(datos),
+      )
+      .pipe(map(({ estacionamiento }) => aEstacionamiento(estacionamiento)));
+  }
+
+  /** `PATCH /api/estacionamientos/:id` solo con la publicacion. */
+  cambiarPublicacion(id: Id, publicado: boolean): Observable<Estacionamiento> {
+    return this.http
+      .patch<{ estacionamiento: EstacionamientoDto }>(`${this.ruta}/${id}`, { publicado })
+      .pipe(map(({ estacionamiento }) => aEstacionamiento(estacionamiento)));
+  }
+
+  /** `DELETE /api/estacionamientos/:id` (baja logica en cascada). */
+  darDeBaja(id: Id): Observable<Estacionamiento> {
+    return this.http
+      .delete<{ estacionamiento: EstacionamientoDto }>(`${this.ruta}/${id}`)
+      .pipe(map(({ estacionamiento }) => aEstacionamiento(estacionamiento)));
+  }
 }
 
 /* --------------------------- helpers de filtrado --------------------------- */

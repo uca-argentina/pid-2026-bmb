@@ -112,6 +112,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'estacionamientos/:estacionamientoId/editar',
+        title: 'Parkit · Editar estacionamiento',
+        loadComponent: () =>
+          import('./pages/propietario/editar-estacionamiento/editar-estacionamiento').then(
+            (m) => m.EditarEstacionamiento,
+          ),
+      },
+      {
         path: 'estacionamientos/:estacionamientoId/cocheras',
         title: 'Parkit · Cocheras',
         loadComponent: () =>
