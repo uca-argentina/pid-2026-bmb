@@ -1,0 +1,164 @@
+<div class="mx-auto w-full max-w-[640px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header>
+      <p class="eyebrow">{{ rolActivo() }}</p>
+      <h1 class="titulo-vista mt-1.5">Mi perfil</h1>
+      @if (usuario(); as datosUsuario) {
+        <p class="mt-1.5 text-[13.5px] text-plomo">{{ datosUsuario.email }}</p>
+      }
+    </header>
+
+    <!-- Datos y perfiles -->
+    <ui-tarjeta relleno="lg">
+      <form class="flex flex-col gap-4" [formGroup]="datos" (ngSubmit)="guardarDatos()" novalidate>
+        <h2 class="text-[15px] font-semibold text-tinta">Tus datos</h2>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="campo">
+            <span class="label-campo">Nombre</span>
+            <input type="text" formControlName="nombre" autocomplete="given-name" />
+            @if (invalidoDatos('nombre')) {
+              <span class="campo-error">Ingresá al menos 2 letras.</span>
+            }
+          </label>
+          <label class="campo">
+            <span class="label-campo">Apellido</span>
+            <input type="text" formControlName="apellido" autocomplete="family-name" />
+            @if (invalidoDatos('apellido')) {
+              <span class="campo-error">Ingresá al menos 2 letras.</span>
+            }
+          </label>
+        </div>
+
+        <label class="campo">
+          <span class="label-campo">Email</span>
+          <input type="email" formControlName="email" autocomplete="email" />
+          @if (invalidoDatos('email')) {
+            <span class="campo-error">Ingresá un email válido.</span>
+          }
+        </label>
+
+        <label class="campo">
+          <span class="label-campo">
+            Teléfono <span class="font-normal text-plomo">(opcional)</span>
+          </span>
+          <input type="tel" formControlName="telefono" autocomplete="tel" />
+        </label>
+
+        <fieldset class="flex flex-col gap-2">
+          <legend class="label-campo mb-2">Perfiles habilitados</legend>
+          @for (perfil of perfiles; track perfil.rol) {
+            <label class="flex items-start gap-2.5 text-[13px] text-grafito">
+              <input
+                class="mt-0.5 size-4 shrink-0 accent-acento"
+                type="checkbox"
+                [formControlName]="perfil.control"
+              />
+              <span>
+                {{ etiquetaRol[perfil.rol] }}
+                <span class="block text-[12px] text-plomo">{{ perfil.descripcion }}</span>
+              </span>
+            </label>
+          }
+          @if (datos.touched && datos.hasError('sinPerfiles')) {
+            <span class="campo-error">Tenés que dejar al menos un perfil.</span>
+          } @else {
+            <span class="campo-ayuda">
+              Con los dos podés alternar entre conductor y propietario desde el menú.
+            </span>
+          }
+        </fieldset>
+
+        @if (errorDatos(); as mensaje) {
+          <p
+            class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px] text-ocupada"
+            role="alert"
+          >
+            {{ mensaje }}
+          </p>
+        }
+        @if (avisoDatos(); as mensaje) {
+          <p
+            class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px] text-exito"
+            role="status"
+          >
+            {{ mensaje }}
+          </p>
+        }
+
+        <ui-boton variante="primario" tipo="submit" [cargando]="guardandoDatos()">
+          Guardar cambios
+        </ui-boton>
+      </form>
+    </ui-tarjeta>
+
+    <!-- Contrasena -->
+    <ui-tarjeta relleno="lg">
+      <form class="flex flex-col gap-4" [formGroup]="clave" (ngSubmit)="cambiarPassword()" novalidate>
+        <h2 class="text-[15px] font-semibold text-tinta">Contraseña</h2>
+
+        <label class="campo">
+          <span class="label-campo">Contraseña actual</span>
+          <input type="password" formControlName="passwordActual" autocomplete="current-password" />
+          @if (invalidoClave('passwordActual')) {
+            <span class="campo-error">Ingresá tu contraseña actual.</span>
+          }
+        </label>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="campo">
+            <span class="label-campo">Nueva</span>
+            <input type="password" formControlName="password" autocomplete="new-password" />
+            @if (invalidoClave('password')) {
+              <span class="campo-error">Al menos {{ passwordMin }} caracteres.</span>
+            }
+          </label>
+          <label class="campo">
+            <span class="label-campo">Repetir</span>
+            <input type="password" formControlName="repetirPassword" autocomplete="new-password" />
+            @if (passwordsDistintas()) {
+              <span class="campo-error">No coinciden.</span>
+            }
+          </label>
+        </div>
+
+        @if (errorClave(); as mensaje) {
+          <p
+            class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px] text-ocupada"
+            role="alert"
+          >
+            {{ mensaje }}
+          </p>
+        }
+        @if (avisoClave(); as mensaje) {
+          <p
+            class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px] text-exito"
+            role="status"
+          >
+            {{ mensaje }}
+          </p>
+        }
+
+        <ui-boton tipo="submit" [cargando]="guardandoClave()">Cambiar contraseña</ui-boton>
+      </form>
+    </ui-tarjeta>
+
+    <!-- Baja -->
+    <section
+      class="flex flex-col gap-3 rounded-tarjeta border border-ocupada/20 bg-ocupada/[0.03]
+             px-5 py-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
+      aria-labelledby="titulo-eliminar"
+    >
+      <div>
+        <h2 id="titulo-eliminar" class="text-[14px] font-semibold text-tinta">Eliminar mi cuenta</h2>
+        <p class="mt-0.5 text-[13px] text-plomo">
+          Se cancelan tus reservas futuras y tus estacionamientos dejan de publicarse. El historial
+          se conserva.
+        </p>
+      </div>
+      <ui-boton variante="peligro" [cargando]="borrando()" (presionado)="eliminarCuenta()">
+        Eliminar
+      </ui-boton>
+    </section>
+  </div>
+</div>

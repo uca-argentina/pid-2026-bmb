@@ -69,6 +69,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/conductor/editar-vehiculo/editar-vehiculo').then((m) => m.EditarVehiculo),
       },
+      {
+        path: 'perfil',
+        title: 'Parkit · Mi perfil',
+        loadComponent: () => import('./pages/perfil/perfil').then((m) => m.Perfil),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'explorar' },
     ],
   },
@@ -111,6 +116,11 @@ export const routes: Routes = [
         title: 'Parkit · Cocheras',
         loadComponent: () =>
           import('./pages/propietario/cocheras/cocheras').then((m) => m.Cocheras),
+      },
+      {
+        path: 'perfil',
+        title: 'Parkit · Mi perfil',
+        loadComponent: () => import('./pages/perfil/perfil').then((m) => m.Perfil),
       },
       { path: '', pathMatch: 'full', redirectTo: 'tablero' },
     ],

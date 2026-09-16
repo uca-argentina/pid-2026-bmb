@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '@env/environment';
-import { Credenciales, RegistroUsuario, RolUsuario, SesionAuth, Usuario } from '@app/models';
+import { CambiosPerfil, Credenciales, RegistroUsuario, RolUsuario, SesionAuth, Usuario } from '@app/models';
 import { SesionDto, UsuarioDto } from './api/api.dto';
 import { aPayloadRegistro, aSesion, aUsuario } from './api/api.mapeo';
 import { USUARIOS_MOCK } from './mocks/datos-mock';
@@ -104,6 +104,38 @@ export class AuthService {
       map(aSesion),
       tap((sesion) => this.guardarSesion(sesion)),
     );
+  }
+
+  /** `PATCH /api/auth/me`: guarda los cambios y actualiza la sesion. */
+  actualizarPerfil(cambios: CambiosPerfil): Observable<SesionAuth> {
+    if (environment.usarMocks) {
+      const sesion = this.sesion();
+      if (!sesion) return simularError<SesionAuth>('No hay sesion activa');
+
+      const { password, passwordActual, ...datos } = cambios;
+      const usuario = { ...clonar(sesion.usuario), ...datos };
+      usuario.rol = usuario.roles.includes(usuario.rol) ? usuario.rol : usuario.roles[0];
+
+      return simular<SesionAuth>({ ...sesion, usuario }).pipe(
+        tap((nueva) => this.guardarSesion(nueva)),
+      );
+    }
+
+    return this.http.patch<SesionDto>(`${this.ruta}/me`, cambios).pipe(
+      map(aSesion),
+      tap((sesion) => this.guardarSesion(sesion)),
+    );
+  }
+
+  /** `DELETE /api/auth/me`: baja de la cuenta y cierre de sesion. */
+  eliminarCuenta(): Observable<void> {
+    if (environment.usarMocks) {
+      return simular<void>(undefined).pipe(tap(() => this.logout()));
+    }
+
+    return this.http
+      .delete<void>(`${this.ruta}/me`)
+      .pipe(tap(() => this.logout()));
   }
 
   logout(): void {

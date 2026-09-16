@@ -37,6 +37,17 @@ export interface RegistroUsuario {
   rol: RolUsuario;
 }
 
+/** Payload de `PATCH /api/auth/me`: solo viajan los campos que se tocaron. */
+export interface CambiosPerfil {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  telefono?: string;
+  roles?: RolUsuario[];
+  password?: string;
+  passwordActual?: string;
+}
+
 /** Respuesta de `POST /api/auth/login` y `/register`. */
 export interface SesionAuth {
   token: string;
