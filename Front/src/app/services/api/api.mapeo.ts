@@ -213,20 +213,6 @@ export function aPayloadCambiosVehiculo(cambios: CambiosVehiculo) {
 
 /* --------------------------------- reserva -------------------------------- */
 
-/**
- * La base guarda PENDIENTE/CONFIRMADA hasta que alguien cambia el estado. Para
- * mostrarla, una reserva vigente que ya empezo esta "en curso" y una que ya
- * termino, finalizada.
- */
-function estadoVisible(estado: EstadoReservaDto, inicio: string, fin: string): EstadoReserva {
-  if (estado !== 'PENDIENTE' && estado !== 'CONFIRMADA') return estado;
-
-  const ahora = Date.now();
-  if (Date.parse(fin) <= ahora) return 'FINALIZADA';
-  if (Date.parse(inicio) <= ahora) return 'EN_CURSO';
-  return estado;
-}
-
 export function aReserva(dto: ReservaDto): ReservaDetallada {
   const desde = partesLocales(dto.inicio);
   const hasta = partesLocales(dto.fin);
@@ -241,9 +227,11 @@ export function aReserva(dto: ReservaDto): ReservaDetallada {
     fecha: desde.fecha,
     horaDesde: desde.hora,
     horaHasta: hasta.hora,
-    estado: estadoVisible(dto.estado, dto.inicio, dto.fin),
+    estado: dto.estado,
     precioTotal: dto.precio_total,
     creadaEn: dto.created_at,
+    ingresoEn: dto.ingreso_real,
+    egresoEn: dto.egreso_real,
     estacionamiento: {
       id: dto.id_estacionamiento,
       nombre: dto.estacionamiento,

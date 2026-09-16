@@ -119,6 +119,16 @@
         </ui-tarjeta>
 
         <!-- Reservas de hoy -->
+        @if (error(); as mensaje) {
+          <p
+            class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px]
+                   text-ocupada"
+            role="alert"
+          >
+            {{ mensaje }}
+          </p>
+        }
+
         <ui-tarjeta relleno="ninguno" [recortar]="true">
           <p class="label-campo px-5 pt-5 pb-3.5 lg:px-6 lg:pt-[22px]">Reservas de hoy</p>
 
@@ -130,7 +140,14 @@
             </p>
           } @else {
             @for (reserva of recursoReservasHoy.value(); track reserva.id) {
-              <app-fila-reserva class="aparece" [reserva]="reserva" vista="PROPIETARIO" />
+              <app-fila-reserva
+                class="aparece"
+                [reserva]="reserva"
+                vista="PROPIETARIO"
+                [permiteGestionar]="true"
+                [procesando]="procesandoId() === reserva.id"
+                (avanzar)="avanzar($event)"
+              />
             }
           }
         </ui-tarjeta>

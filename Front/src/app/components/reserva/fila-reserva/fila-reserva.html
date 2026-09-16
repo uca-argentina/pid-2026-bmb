@@ -14,7 +14,17 @@
 
   <div class="flex shrink-0 items-center gap-2">
     <ui-etiqueta [tono]="tonoEstado()">{{ etiquetaEstado[reserva().estado] }}</ui-etiqueta>
-    @if (permiteCancelar() && activa()) {
+    @if (permiteGestionar() && paso(); as etiqueta) {
+      <ui-boton
+        variante="primario"
+        tamano="sm"
+        [cargando]="procesando()"
+        (presionado)="avanzar.emit(reserva())"
+      >
+        {{ etiqueta }}
+      </ui-boton>
+    }
+    @if (permiteCancelar() && cancelable()) {
       <ui-boton
         variante="peligro"
         tamano="sm"

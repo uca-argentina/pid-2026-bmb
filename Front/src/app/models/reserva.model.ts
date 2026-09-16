@@ -36,6 +36,9 @@ export interface Reserva {
   estado: EstadoReserva;
   precioTotal: number;
   creadaEn: FechaHoraISO;
+  /** Horas reales que registra el propietario. */
+  ingresoEn: FechaHoraISO | null;
+  egresoEn: FechaHoraISO | null;
 }
 
 /**

@@ -6,7 +6,13 @@ import { EstadoCochera, RolUsuario } from '@app/models';
  * la app trabaja con los modelos de `models/`.
  */
 
-export type EstadoReservaDto = 'PENDIENTE' | 'CONFIRMADA' | 'CANCELADA' | 'FINALIZADA';
+// EN_CURSO lo arma el backend: es una reserva CONFIRMADA con ingreso registrado.
+export type EstadoReservaDto =
+  | 'PENDIENTE'
+  | 'CONFIRMADA'
+  | 'EN_CURSO'
+  | 'CANCELADA'
+  | 'FINALIZADA';
 
 export interface UsuarioDto {
   id_usuario: string;
@@ -91,6 +97,8 @@ export interface ReservaDto {
   fin: string;
   estado: EstadoReservaDto;
   created_at: string;
+  ingreso_real: string | null;
+  egreso_real: string | null;
   id_vehiculo: string;
   patente: string;
   marca: string | null;

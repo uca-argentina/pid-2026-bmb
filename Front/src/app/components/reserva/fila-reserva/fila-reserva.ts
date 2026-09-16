@@ -1,11 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import {
-  esReservaActiva,
-  EstadoReserva,
-  ETIQUETA_ESTADO_RESERVA,
-  ReservaDetallada,
-} from '@app/models';
+import { EstadoReserva, ETIQUETA_ESTADO_RESERVA, ReservaDetallada } from '@app/models';
+import { reservaEnJuego } from '@app/services/ciclo-reserva';
 import { desdeFechaISO } from '@app/utils/fecha.util';
 import { Boton, Etiqueta, TonoEtiqueta } from '@app/components/ui';
 
@@ -16,6 +12,13 @@ const TONO_ESTADO: Record<EstadoReserva, TonoEtiqueta> = {
   EN_CURSO: 'exito',
   FINALIZADA: 'neutro',
   CANCELADA: 'peligro',
+};
+
+/** Que puede hacer el propietario segun como este la reserva. */
+const PASOS: Partial<Record<EstadoReserva, string>> = {
+  PENDIENTE: 'Confirmar',
+  CONFIRMADA: 'Registrar ingreso',
+  EN_CURSO: 'Registrar egreso',
 };
 
 /**
@@ -36,13 +39,17 @@ export class FilaReserva {
   readonly reserva = input.required<ReservaDetallada>();
   readonly vista = input<'CONDUCTOR' | 'PROPIETARIO'>('PROPIETARIO');
   readonly permiteCancelar = input(false);
-  /** Muestra el spinner en el boton mientras se cancela esta reserva. */
+  /** Botones del ciclo (confirmar / ingreso / egreso) para el propietario. */
+  readonly permiteGestionar = input(false);
+  /** Muestra el spinner en el boton mientras se procesa esta reserva. */
   readonly cancelando = input(false);
+  readonly procesando = input(false);
 
   readonly cancelar = output<ReservaDetallada>();
+  readonly avanzar = output<ReservaDetallada>();
 
   protected readonly etiquetaEstado = ETIQUETA_ESTADO_RESERVA;
-  protected readonly activa = computed(() => esReservaActiva(this.reserva()));
+  protected readonly activa = computed(() => reservaEnJuego(this.reserva()));
   protected readonly tonoEstado = computed(() => TONO_ESTADO[this.reserva().estado]);
 
   protected readonly titulo = computed(() => {
@@ -53,4 +60,12 @@ export class FilaReserva {
   });
 
   protected readonly fecha = computed(() => desdeFechaISO(this.reserva().fecha));
+
+  /** El unico paso que le queda al propietario, o null si no hay nada que hacer. */
+  protected readonly paso = computed(() => PASOS[this.reserva().estado]);
+
+  /** El conductor no puede cancelar una reserva que ya arranco. */
+  protected readonly cancelable = computed(
+    () => this.activa() && this.reserva().estado !== 'EN_CURSO',
+  );
 }

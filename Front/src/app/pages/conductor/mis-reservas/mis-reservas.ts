@@ -3,7 +3,8 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FilaReserva } from '@app/components/reserva';
 import { Boton, Cargando, Chip, EstadoVacio, Tarjeta } from '@app/components/ui';
-import { esReservaActiva, Id, ReservaDetallada } from '@app/models';
+import { Id, ReservaDetallada } from '@app/models';
+import { reservaEnJuego } from '@app/services/ciclo-reserva';
 import { ReservaService } from '@app/services/reserva.service';
 
 type Pestania = 'VIGENTES' | 'HISTORIAL';
@@ -35,11 +36,10 @@ export class MisReservas {
     defaultValue: [] as ReservaDetallada[],
   });
 
-  protected readonly visibles = computed(() =>
-    this.recurso
-      .value()
-      .filter((r) => (this.pestania() === 'VIGENTES' ? esReservaActiva(r) : !esReservaActiva(r))),
-  );
+  protected readonly visibles = computed(() => {
+    const vigentes = this.pestania() === 'VIGENTES';
+    return this.recurso.value().filter((reserva) => reservaEnJuego(reserva) === vigentes);
+  });
 
   protected cambiarPestania(pestania: Pestania): void {
     this.pestania.set(pestania);

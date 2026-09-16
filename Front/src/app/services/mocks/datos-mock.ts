@@ -249,6 +249,8 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'EN_CURSO',
     precioTotal: 2700,
     creadaEn: '2026-09-03T18:41:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
   {
     id: 'res-2',
@@ -263,6 +265,8 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'CONFIRMADA',
     precioTotal: 2250,
     creadaEn: '2026-09-03T20:02:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
   {
     id: 'res-3',
@@ -277,6 +281,8 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'CONFIRMADA',
     precioTotal: 3600,
     creadaEn: '2026-09-03T21:15:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
   {
     id: 'res-4',
@@ -291,5 +297,7 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'FINALIZADA',
     precioTotal: 2720,
     creadaEn: '2026-08-27T15:05:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
 ];

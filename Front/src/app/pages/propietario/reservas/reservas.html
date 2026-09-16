@@ -15,6 +15,26 @@
       }
     </header>
 
+    @if (aviso(); as mensaje) {
+      <p
+        class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px]
+               text-exito"
+        role="status"
+      >
+        {{ mensaje }}
+      </p>
+    }
+
+    @if (error(); as mensaje) {
+      <p
+        class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px]
+               text-ocupada"
+        role="alert"
+      >
+        {{ mensaje }}
+      </p>
+    }
+
     @if (recurso.isLoading()) {
       <ui-cargando [cantidad]="2" />
     } @else if (recurso.value().length === 0) {
@@ -25,7 +45,14 @@
     } @else {
       <ui-tarjeta relleno="ninguno" [recortar]="true">
         @for (reserva of recurso.value(); track reserva.id) {
-          <app-fila-reserva class="aparece" [reserva]="reserva" vista="PROPIETARIO" />
+          <app-fila-reserva
+            class="aparece"
+            [reserva]="reserva"
+            vista="PROPIETARIO"
+            [permiteGestionar]="true"
+            [procesando]="procesandoId() === reserva.id"
+            (avanzar)="avanzar($event)"
+          />
         }
       </ui-tarjeta>
     }

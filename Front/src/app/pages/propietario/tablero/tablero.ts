@@ -15,6 +15,7 @@ import {
   ReservaDetallada,
 } from '@app/models';
 import { AuthService } from '@app/services/auth.service';
+import { avanzarReserva } from '@app/services/ciclo-reserva';
 import { CocheraService } from '@app/services/cochera.service';
 import { EstacionamientoService } from '@app/services/estacionamiento.service';
 import { ReservaService } from '@app/services/reserva.service';
@@ -94,6 +95,9 @@ export class Tablero {
     return new Date();
   });
 
+  protected readonly procesandoId = signal<Id | null>(null);
+  protected readonly error = signal<string | null>(null);
+
   protected readonly ingresos = computed(
     () => `$ ${this.resumen().ingresos.toLocaleString('es-AR')}`,
   );
@@ -105,6 +109,28 @@ export class Tablero {
 
   protected abrir(cochera: Cochera): void {
     this.cocheraAbierta.update((actual) => (actual?.id === cochera.id ? null : cochera));
+  }
+
+  /** Ciclo de la reserva desde el panel: mismos pasos que "Reservas recibidas". */
+  protected avanzar(reserva: ReservaDetallada): void {
+    const paso = avanzarReserva(this.reservas, reserva);
+    if (!paso) return;
+
+    this.procesandoId.set(reserva.id);
+    this.error.set(null);
+
+    paso.llamada.subscribe({
+      next: () => {
+        this.procesandoId.set(null);
+        // El ingreso y el egreso cambian el estado de la cochera.
+        this.recursoReservasHoy.reload();
+        this.recursoCocheras.reload();
+      },
+      error: (e: Error) => {
+        this.procesandoId.set(null);
+        this.error.set(e.message);
+      },
+    });
   }
 
   /** `PATCH /api/estacionamientos/:id/cocheras/:idCochera` y refresco de la cuadricula. */

@@ -119,6 +119,8 @@ export class ReservaService {
         estado: 'CONFIRMADA',
         precioTotal: Math.round(horas * estacionamiento.precioPorHora),
         creadaEn: new Date().toISOString(),
+        ingresoEn: null,
+        egresoEn: null,
       });
     }
 
@@ -169,6 +171,28 @@ export class ReservaService {
 
     return this.http
       .patch<{ reserva: ReservaDto }>(`${this.ruta}/${id}/cancelar`, {})
+      .pipe(map(({ reserva }) => aReserva(reserva)));
+  }
+
+  /**
+   * Ciclo que maneja el propietario: confirmar la reserva, registrar que el
+   * vehiculo llego y registrar que se fue (eso la finaliza).
+   */
+  confirmar(id: Id): Observable<Reserva> {
+    return this.transicion(id, 'confirmar');
+  }
+
+  registrarIngreso(id: Id): Observable<Reserva> {
+    return this.transicion(id, 'ingreso');
+  }
+
+  registrarEgreso(id: Id): Observable<Reserva> {
+    return this.transicion(id, 'egreso');
+  }
+
+  private transicion(id: Id, paso: 'confirmar' | 'ingreso' | 'egreso'): Observable<Reserva> {
+    return this.http
+      .patch<{ reserva: ReservaDto }>(`${this.ruta}/${id}/${paso}`, {})
       .pipe(map(({ reserva }) => aReserva(reserva)));
   }
 
