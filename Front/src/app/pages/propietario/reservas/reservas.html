@@ -1,4 +1,4 @@
-<div class="mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+<div class="aparece mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
   <div class="flex flex-col gap-6">
     <header>
       <p class="eyebrow">Propietario</p>
@@ -25,7 +25,7 @@
     } @else {
       <ui-tarjeta relleno="ninguno" [recortar]="true">
         @for (reserva of recurso.value(); track reserva.id) {
-          <app-fila-reserva [reserva]="reserva" vista="PROPIETARIO" />
+          <app-fila-reserva class="aparece" [reserva]="reserva" vista="PROPIETARIO" />
         }
       </ui-tarjeta>
     }

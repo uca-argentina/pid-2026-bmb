@@ -84,4 +84,7 @@
 
   /* Curva y duracion unicas para todas las micro-transiciones. */
   --ease-suave: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Entradas (pantallas, listas, avisos). Los hover siguen en 160ms. */
+  --duracion-entrada: 220ms;
 }

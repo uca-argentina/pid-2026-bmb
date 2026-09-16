@@ -203,6 +203,54 @@
     letter-spacing: -0.02em;
   }
 
+  /* ------------------------------------------------------------------
+     Entradas. Una sola idea en toda la app: lo que aparece sube 6px con un
+     fundido corto. La usan las pantallas al navegar, las listas y los avisos.
+     `prefers-reduced-motion` las apaga (regla en @layer base).
+  ------------------------------------------------------------------ */
+  .aparece {
+    animation: aparecer var(--duracion-entrada) var(--ease-suave) both;
+  }
+
+  /* Cada elemento de la lista entra apenas despues del anterior. */
+  .aparece-en-cadena > * {
+    animation: aparecer var(--duracion-entrada) var(--ease-suave) both;
+  }
+
+  .aparece-en-cadena > *:nth-child(2) {
+    animation-delay: 40ms;
+  }
+
+  .aparece-en-cadena > *:nth-child(3) {
+    animation-delay: 80ms;
+  }
+
+  .aparece-en-cadena > *:nth-child(4) {
+    animation-delay: 120ms;
+  }
+
+  .aparece-en-cadena > *:nth-child(5) {
+    animation-delay: 160ms;
+  }
+
+  /* A partir del sexto ya no se nota la cascada y alarga la espera. */
+  .aparece-en-cadena > *:nth-child(n + 6) {
+    animation-delay: 200ms;
+  }
+
+  /* Los mensajes de error y de confirmacion aparecen despues de una accion:
+     que entren solos evita que el bloque salte de golpe. El skeleton queda
+     afuera porque entra junto con la pantalla. */
+  [role='alert'],
+  [role='status']:not(ui-cargando *) {
+    animation: aparecer 180ms var(--ease-suave) both;
+  }
+
+  /* Confirmaciones: el circulo del tilde crece apenas al aparecer. */
+  .surge {
+    animation: surgir var(--duracion-entrada) var(--ease-suave) both;
+  }
+
   /* Barrido de los skeletons de carga. */
   .esqueleto {
     background: linear-gradient(
@@ -213,6 +261,28 @@
     );
     background-size: 200% 100%;
     animation: esqueleto-barrido 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

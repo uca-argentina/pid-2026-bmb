@@ -1,4 +1,4 @@
-<div class="mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+<div class="aparece mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
   @if (recursoEstacionamiento.isLoading()) {
     <ui-cargando [cantidad]="2" />
   } @else if (recursoEstacionamiento.error(); as error) {
@@ -8,10 +8,10 @@
   } @else if (recursoEstacionamiento.value(); as estacionamiento) {
     @if (reservaConfirmada(); as reserva) {
       <!-- Confirmacion -->
-      <div class="flex flex-col gap-6">
+      <div class="aparece flex flex-col gap-6">
         <header class="flex flex-col items-start gap-3">
           <span
-            class="grid size-11 place-items-center rounded-full bg-exito-suave text-exito"
+            class="surge grid size-11 place-items-center rounded-full bg-exito-suave text-exito"
             aria-hidden="true"
           >
             <svg class="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor"
@@ -60,7 +60,7 @@
         </div>
       </div>
     } @else {
-      <div class="flex flex-col gap-6">
+      <div class="aparece flex flex-col gap-6">
         <header>
           <a
             class="inline-flex items-center gap-1.5 rounded-boton text-[12px] font-medium
