@@ -32,7 +32,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       </div>
     </div>
   `,
-  host: { class: 'block' },
+  host: { class: 'aparece block' },
 })
 export class EstadoVacio {
   readonly titulo = input.required<string>();

@@ -1,0 +1,62 @@
+<div class="aparece mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header>
+      <p class="eyebrow">Conductor</p>
+      <h1 class="titulo-vista mt-1.5">Mis reservas</h1>
+
+      <div class="mt-4 flex gap-2">
+        <ui-chip [activo]="pestania() === 'VIGENTES'" (alternar)="cambiarPestania('VIGENTES')">
+          Vigentes
+        </ui-chip>
+        <ui-chip [activo]="pestania() === 'HISTORIAL'" (alternar)="cambiarPestania('HISTORIAL')">
+          Historial
+        </ui-chip>
+      </div>
+    </header>
+
+    @if (aviso(); as mensaje) {
+      <p
+        class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px] text-exito"
+        role="status"
+      >
+        {{ mensaje }} La vas a encontrar en Historial.
+      </p>
+    }
+
+    @if (error(); as mensaje) {
+      <p
+        class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px] text-ocupada"
+        role="alert"
+      >
+        No pudimos cancelar la reserva: {{ mensaje }}
+      </p>
+    }
+
+    @if (recurso.isLoading()) {
+      <ui-cargando [cantidad]="2" />
+    } @else if (recurso.error(); as error) {
+      <ui-estado-vacio titulo="No pudimos cargar tus reservas" [descripcion]="error.message">
+        <ui-boton (presionado)="recurso.reload()">Reintentar</ui-boton>
+      </ui-estado-vacio>
+    } @else if (visibles().length === 0) {
+      <ui-estado-vacio
+        [titulo]="pestania() === 'VIGENTES' ? 'No tenes reservas activas' : 'Todavia no hay historial'"
+        descripcion="Cuando reserves un lugar lo vas a ver aca."
+      >
+        <ui-boton routerLink="/conductor/explorar">Explorar estacionamientos</ui-boton>
+      </ui-estado-vacio>
+    } @else {
+      <ui-tarjeta relleno="ninguno" [recortar]="true">
+        @for (reserva of visibles(); track reserva.id) {
+          <app-fila-reserva class="aparece"
+            [reserva]="reserva"
+            vista="CONDUCTOR"
+            [permiteCancelar]="true"
+            [cancelando]="cancelandoId() === reserva.id"
+            (cancelar)="cancelar($event)"
+          />
+        }
+      </ui-tarjeta>
+    }
+  </div>
+</div>

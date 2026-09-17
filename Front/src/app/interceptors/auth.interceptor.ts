@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '@app/services/auth.service';
 
 /** Agrega el JWT que emite `/api/auth/login` a cada request de la API. */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {

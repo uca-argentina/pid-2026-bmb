@@ -1,6 +1,6 @@
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '@env/environment';
 
 /** Emite un valor imitando la latencia de la API. */
 export function simular<T>(valor: T): Observable<T> {

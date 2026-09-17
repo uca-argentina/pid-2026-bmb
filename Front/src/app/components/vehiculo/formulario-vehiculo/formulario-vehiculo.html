@@ -1,0 +1,70 @@
+<form class="flex flex-col gap-4" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+  <label class="campo">
+    <span class="label-campo">Patente</span>
+    <input
+      class="uppercase"
+      type="text"
+      formControlName="patente"
+      placeholder="AB 123 CD"
+      autocomplete="off"
+    />
+    @if (invalido('patente')) {
+      <span class="campo-error">Tiene que tener entre 5 y 12 caracteres.</span>
+    }
+  </label>
+
+  <div class="flex flex-col gap-1.5" role="group" aria-labelledby="etiqueta-tipo">
+    <span id="etiqueta-tipo" class="label-campo">Tipo</span>
+    <div class="flex flex-wrap gap-2">
+      @for (tipo of tipos; track tipo) {
+        <ui-chip
+          [activo]="formulario.controls.tipo.value === tipo"
+          (alternar)="elegirTipo(tipo)"
+        >
+          {{ etiquetaTipo[tipo] }}
+        </ui-chip>
+      }
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <label class="campo">
+      <span class="label-campo">Marca <span class="font-normal text-plomo">(opcional)</span></span>
+      <input type="text" formControlName="marca" placeholder="Toyota" />
+    </label>
+    <label class="campo">
+      <span class="label-campo">Modelo <span class="font-normal text-plomo">(opcional)</span></span>
+      <input type="text" formControlName="modelo" placeholder="Corolla" />
+    </label>
+  </div>
+
+  <label class="campo">
+    <span class="label-campo">Color <span class="font-normal text-plomo">(opcional)</span></span>
+    <input type="text" formControlName="color" placeholder="Gris" />
+  </label>
+
+  <label class="flex items-start gap-2.5 text-[13px] text-grafito">
+    <input class="mt-0.5 size-4 shrink-0 accent-acento" type="checkbox" formControlName="predeterminado" />
+    <span>
+      Usar como predeterminado al reservar
+      @if (mostrarHintPrimero()) {
+        <span class="block text-[12px] text-plomo">
+          Tu primer vehículo queda como predeterminado aunque no lo marques.
+        </span>
+      }
+    </span>
+  </label>
+
+  @if (error(); as mensaje) {
+    <p
+      class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px] text-ocupada"
+      role="alert"
+    >
+      {{ mensaje }}
+    </p>
+  }
+
+  <ui-boton variante="primario" tipo="submit" [bloque]="true" [cargando]="enviando()">
+    {{ textoEnviar() }}
+  </ui-boton>
+</form>

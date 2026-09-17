@@ -1,27 +1,23 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Observable, map } from 'rxjs';
+import { environment } from '@env/environment';
 import {
   BORRADOR_VACIO,
   BorradorReserva,
   ConsultaDisponibilidad,
   FechaISO,
-  FRANJAS_ESTANDAR,
   FranjaDisponible,
+  FRANJAS_ESTANDAR,
   Id,
   NuevaReserva,
   Reserva,
   ReservaDetallada,
-} from '../models';
-import { duracionEnHoras } from '../utils/fecha.util';
-import {
-  COCHERAS_MOCK,
-  ESTACIONAMIENTOS_MOCK,
-  ID_CONDUCTOR,
-  RESERVAS_MOCK,
-  VEHICULOS_MOCK,
-} from './mocks/datos-mock';
+} from '@app/models';
+import { duracionEnHoras } from '@app/utils/fecha.util';
+import { FranjaDto, ReservaDto } from './api/api.dto';
+import { ID_TIPO_VEHICULO, aFranja, aPayloadReserva, aReserva } from './api/api.mapeo';
+import { COCHERAS_MOCK, ESTACIONAMIENTOS_MOCK, ID_CONDUCTOR, RESERVAS_MOCK, VEHICULOS_MOCK } from './mocks/datos-mock';
 import { clonar, simular, simularError } from './mocks/mock.util';
 
 /**
@@ -62,7 +58,7 @@ export class ReservaService {
     this.borradorInterno.set({ ...BORRADOR_VACIO });
   }
 
-  /** Convierte el borrador en el payload que espera el backend. */
+  /** Convierte el borrador en los datos de la nueva reserva. */
   aPayload(): NuevaReserva | null {
     const b = this.borradorInterno();
     if (!b.estacionamientoId || !b.vehiculoId || !b.fecha || !b.horaDesde || !b.horaHasta) {
@@ -86,15 +82,19 @@ export class ReservaService {
     }
 
     let params = new HttpParams().set('fecha', consulta.fecha);
-    if (consulta.tipoVehiculo) params = params.set('tipoVehiculo', consulta.tipoVehiculo);
+    if (consulta.tipoVehiculo) {
+      params = params.set('id_tipo_vehiculo', ID_TIPO_VEHICULO[consulta.tipoVehiculo]);
+    }
 
-    return this.http.get<FranjaDisponible[]>(
-      `/estacionamientos/${consulta.estacionamientoId}/disponibilidad`,
-      { params },
-    );
+    return this.http
+      .get<{ franjas: FranjaDto[] }>(
+        `/estacionamientos/${consulta.estacionamientoId}/disponibilidad`,
+        { params },
+      )
+      .pipe(map(({ franjas }) => franjas.map(aFranja)));
   }
 
-  /** `POST /api/reservas` */
+  /** `POST /api/reservas` (el backend asigna la cochera) */
   crear(datos: NuevaReserva): Observable<Reserva> {
     if (environment.usarMocks) {
       const estacionamiento = ESTACIONAMIENTOS_MOCK.find((e) => e.id === datos.estacionamientoId);
@@ -111,6 +111,7 @@ export class ReservaService {
         conductorId: ID_CONDUCTOR,
         estacionamientoId: datos.estacionamientoId,
         cocheraId: cochera?.id ?? null,
+        cocheraIdentificador: cochera?.identificador ?? null,
         vehiculoId: datos.vehiculoId,
         fecha: datos.fecha,
         horaDesde: datos.horaDesde,
@@ -118,10 +119,14 @@ export class ReservaService {
         estado: 'CONFIRMADA',
         precioTotal: Math.round(horas * estacionamiento.precioPorHora),
         creadaEn: new Date().toISOString(),
+        ingresoEn: null,
+        egresoEn: null,
       });
     }
 
-    return this.http.post<Reserva>(this.ruta, datos);
+    return this.http
+      .post<{ reserva: ReservaDto }>(this.ruta, aPayloadReserva(datos))
+      .pipe(map(({ reserva }) => aReserva(reserva)));
   }
 
   /** `GET /api/reservas` (reservas del conductor autenticado) */
@@ -130,11 +135,13 @@ export class ReservaService {
       return simular(RESERVAS_MOCK.filter((r) => r.conductorId === ID_CONDUCTOR).map(expandir));
     }
 
-    return this.http.get<ReservaDetallada[]>(this.ruta);
+    return this.http
+      .get<{ reservas: ReservaDto[] }>(this.ruta)
+      .pipe(map(({ reservas }) => reservas.map(aReserva)));
   }
 
   /**
-   * `GET /api/reservas?estacionamientoId=:id[&fecha=YYYY-MM-DD]` (vista del
+   * `GET /api/estacionamientos/:id/reservas[?fecha=YYYY-MM-DD]` (vista del
    * propietario). Con `fecha` resuelve el bloque "Reservas de hoy" del panel.
    */
   listarPorEstacionamiento(estacionamientoId: Id, fecha?: FechaISO): Observable<ReservaDetallada[]> {
@@ -146,22 +153,11 @@ export class ReservaService {
       );
     }
 
-    let params = new HttpParams().set('estacionamientoId', estacionamientoId);
-    if (fecha) params = params.set('fecha', fecha);
+    const params = fecha ? new HttpParams().set('fecha', fecha) : undefined;
 
-    return this.http.get<ReservaDetallada[]>(this.ruta, { params });
-  }
-
-  /** `GET /api/reservas/:id` */
-  obtener(id: Id): Observable<ReservaDetallada> {
-    if (environment.usarMocks) {
-      const reserva = RESERVAS_MOCK.find((r) => r.id === id);
-      return reserva
-        ? simular(expandir(reserva))
-        : simularError<ReservaDetallada>('Reserva no encontrada');
-    }
-
-    return this.http.get<ReservaDetallada>(`${this.ruta}/${id}`);
+    return this.http
+      .get<{ reservas: ReservaDto[] }>(`/estacionamientos/${estacionamientoId}/reservas`, { params })
+      .pipe(map(({ reservas }) => reservas.map(aReserva)));
   }
 
   /** `PATCH /api/reservas/:id/cancelar` */
@@ -169,15 +165,35 @@ export class ReservaService {
     if (environment.usarMocks) {
       const reserva = RESERVAS_MOCK.find((r) => r.id === id);
       return reserva
-        ? simular<Reserva>({
-            ...clonar(reserva),
-            estado: 'CANCELADA',
-            canceladaEn: new Date().toISOString(),
-          })
+        ? simular<Reserva>({ ...clonar(reserva), estado: 'CANCELADA' })
         : simularError<Reserva>('Reserva no encontrada');
     }
 
-    return this.http.patch<Reserva>(`${this.ruta}/${id}/cancelar`, {});
+    return this.http
+      .patch<{ reserva: ReservaDto }>(`${this.ruta}/${id}/cancelar`, {})
+      .pipe(map(({ reserva }) => aReserva(reserva)));
+  }
+
+  /**
+   * Ciclo que maneja el propietario: confirmar la reserva, registrar que el
+   * vehiculo llego y registrar que se fue (eso la finaliza).
+   */
+  confirmar(id: Id): Observable<Reserva> {
+    return this.transicion(id, 'confirmar');
+  }
+
+  registrarIngreso(id: Id): Observable<Reserva> {
+    return this.transicion(id, 'ingreso');
+  }
+
+  registrarEgreso(id: Id): Observable<Reserva> {
+    return this.transicion(id, 'egreso');
+  }
+
+  private transicion(id: Id, paso: 'confirmar' | 'ingreso' | 'egreso'): Observable<Reserva> {
+    return this.http
+      .patch<{ reserva: ReservaDto }>(`${this.ruta}/${id}/${paso}`, {})
+      .pipe(map(({ reserva }) => aReserva(reserva)));
   }
 
   /** Precio estimado del borrador segun la tarifa del estacionamiento. */
@@ -188,7 +204,7 @@ export class ReservaService {
 
 /* ------------------------------ helpers mock ------------------------------ */
 
-/** Arma la vista expandida que el backend devolvera con los joins resueltos. */
+/** Arma la vista expandida que el backend devuelve con los joins resueltos. */
 function expandir(reserva: Reserva): ReservaDetallada {
   const estacionamiento = ESTACIONAMIENTOS_MOCK.find((e) => e.id === reserva.estacionamientoId)!;
   const vehiculo = VEHICULOS_MOCK.find((v) => v.id === reserva.vehiculoId)!;

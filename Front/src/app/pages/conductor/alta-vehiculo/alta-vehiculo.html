@@ -1,0 +1,25 @@
+<div class="aparece mx-auto w-full max-w-[560px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header>
+      <a
+        class="inline-flex items-center gap-1.5 rounded-boton text-[12px] font-medium
+               text-plomo transition-colors duration-160 ease-out hover:text-acento"
+        routerLink="/conductor/vehiculos"
+      >
+        ← Volver a mis vehículos
+      </a>
+      <p class="eyebrow mt-3">Conductor</p>
+      <h1 class="titulo-vista mt-1.5">Agregar vehículo</h1>
+    </header>
+
+    <ui-tarjeta relleno="lg">
+      <app-formulario-vehiculo
+        textoEnviar="Agregar vehículo"
+        [enviando]="enviando()"
+        [error]="error()"
+        [mostrarHintPrimero]="esPrimero()"
+        (guardar)="guardar($event)"
+      />
+    </ui-tarjeta>
+  </div>
+</div>

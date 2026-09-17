@@ -1,4 +1,4 @@
-import { FechaHoraISO, HoraHHmm, Id } from './api.model';
+import { HoraHHmm, Id } from './api.model';
 import { TipoVehiculo } from './vehiculo.model';
 
 export type DiaSemana =
@@ -32,8 +32,8 @@ export interface Direccion {
   ciudad: string;
   provincia: string;
   codigoPostal: string;
-  latitud: number;
-  longitud: number;
+  latitud: number | null;
+  longitud: number | null;
 }
 
 /** Estacionamiento publicado por un usuario con rol PROPIETARIO. */
@@ -44,22 +44,25 @@ export interface Estacionamiento {
   nombre: string;
   descripcion: string;
   direccion: Direccion;
-  telefonoContacto: string;
-  emailContacto: string;
+  /** Barrio o zona, para la busqueda por zona. */
+  barrioZona: string | null;
+  telefonoContacto: string | null;
+  emailContacto: string | null;
   horarios: FranjaAtencion[];
   precioPorHora: number;
   /** Derivados del agregado de Cochera, los calcula el backend. */
   cocherasTotales: number;
+  /** Cocheras libres en este momento. */
   cocherasDisponibles: number;
   tiposAdmitidos: TipoVehiculo[];
   cubierto: boolean;
-  calificacion: number;
   /** Distancia al usuario en km. Solo viene en busquedas geolocalizadas. */
   distanciaKm?: number;
+  publicado: boolean;
   activo: boolean;
 }
 
-/** Query params de `GET /api/estacionamientos`. */
+/** Filtros del listado. Texto, tipo, precio y cubierto los resuelve la API. */
 export interface FiltrosEstacionamiento {
   busqueda?: string;
   tipoVehiculo?: TipoVehiculo | null;
@@ -69,30 +72,27 @@ export interface FiltrosEstacionamiento {
   orden?: OrdenEstacionamiento;
 }
 
-export type OrdenEstacionamiento = 'DISTANCIA' | 'PRECIO' | 'CALIFICACION';
+export type OrdenEstacionamiento = 'DISTANCIA' | 'PRECIO';
 
 export const ETIQUETA_ORDEN: Record<OrdenEstacionamiento, string> = {
   DISTANCIA: 'Cercania',
   PRECIO: 'Precio',
-  CALIFICACION: 'Puntaje',
 };
 
 /** Payload de `POST /api/estacionamientos`. */
-export type NuevoEstacionamiento = Omit<
-  Estacionamiento,
-  'id' | 'propietarioId' | 'cocherasTotales' | 'cocherasDisponibles' | 'calificacion' | 'distanciaKm'
->;
+export interface NuevoEstacionamiento {
+  nombre: string;
+  descripcion?: string;
+  direccion: Direccion;
+  barrioZona?: string | null;
+  telefonoContacto?: string | null;
+  emailContacto?: string | null;
+  precioPorHora: number;
+  cubierto?: boolean;
+  publicado: boolean;
+  horarios: FranjaAtencion[];
+}
 
 export function direccionCorta(direccion: Direccion): string {
   return `${direccion.calle} ${direccion.numero}, ${direccion.ciudad}`;
-}
-
-/** KPIs del dia que muestra el panel del propietario. */
-export interface ResumenDiario {
-  estacionamientoId: Id;
-  reservasHoy: number;
-  cocherasLibres: number;
-  ingresosDelDia: number;
-  /** Timestamp del ultimo refresco ("Actualizado 9:38"). */
-  actualizadoEn: FechaHoraISO;
 }

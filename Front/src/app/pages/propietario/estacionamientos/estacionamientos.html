@@ -1,0 +1,74 @@
+<div class="aparece mx-auto w-full max-w-[940px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="eyebrow">Propietario</p>
+        <h1 class="titulo-vista mt-1.5">Mis estacionamientos</h1>
+      </div>
+      <ui-boton variante="primario" routerLink="/propietario/estacionamientos/nuevo">
+        Nuevo estacionamiento
+      </ui-boton>
+    </header>
+
+    @if (recurso.isLoading()) {
+      <ui-cargando [cantidad]="2" />
+    } @else if (recurso.error(); as error) {
+      <ui-estado-vacio titulo="No pudimos cargar tus estacionamientos" [descripcion]="error.message">
+        <ui-boton (presionado)="recurso.reload()">Reintentar</ui-boton>
+      </ui-estado-vacio>
+    } @else if (recurso.value().length === 0) {
+      <ui-estado-vacio
+        titulo="Todavía no cargaste estacionamientos"
+        descripcion="Cargá el primero y después sumale las cocheras."
+      >
+        <ui-boton routerLink="/propietario/estacionamientos/nuevo">Cargar estacionamiento</ui-boton>
+      </ui-estado-vacio>
+    } @else {
+      <div class="aparece-en-cadena grid gap-4 lg:grid-cols-2">
+        @for (estacionamiento of recurso.value(); track estacionamiento.id) {
+          <ui-tarjeta>
+            <div class="flex h-full flex-col gap-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h2 class="text-[16px] leading-tight font-semibold text-tinta">
+                    {{ estacionamiento.nombre }}
+                  </h2>
+                  <p class="mt-1 text-[13px] text-plomo">
+                    {{ direccionCorta(estacionamiento.direccion) }}
+                  </p>
+                </div>
+                @if (!estacionamiento.activo) {
+                  <ui-etiqueta tono="peligro">Dado de baja</ui-etiqueta>
+                } @else if (estacionamiento.publicado) {
+                  <ui-etiqueta tono="exito">Publicado</ui-etiqueta>
+                } @else {
+                  <ui-etiqueta>Sin publicar</ui-etiqueta>
+                }
+              </div>
+
+              <p class="num-tabular text-[13px] text-grafito">
+                {{ estacionamiento.cocherasTotales }} cocheras ·
+                $ {{ estacionamiento.precioPorHora.toLocaleString('es-AR') }} por hora
+              </p>
+
+              <div class="mt-auto flex gap-2">
+                <ui-boton
+                  tamano="sm"
+                  [routerLink]="['/propietario/estacionamientos', estacionamiento.id, 'cocheras']"
+                >
+                  Cocheras
+                </ui-boton>
+                <ui-boton
+                  tamano="sm"
+                  [routerLink]="['/propietario/estacionamientos', estacionamiento.id, 'editar']"
+                >
+                  Editar
+                </ui-boton>
+              </div>
+            </div>
+          </ui-tarjeta>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,120 @@
+<div class="relative flex min-h-dvh items-center justify-center overflow-hidden bg-lienzo px-6 py-12">
+  <!-- Mismo halo que la pantalla de ingreso -->
+  <div
+    class="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[620px] -translate-x-1/2
+           rounded-full bg-acento/8 blur-3xl"
+    aria-hidden="true"
+  ></div>
+
+  <div class="aparece relative w-full max-w-[460px]">
+    <header class="mb-7 flex flex-col items-center text-center">
+      <img
+        ngSrc="logo-parkit.png"
+        width="400"
+        height="352"
+        priority
+        alt="Parkit"
+        class="h-auto w-[120px]"
+      />
+      <h1 class="titulo-vista mt-4">Crear tu cuenta</h1>
+      <p class="mt-2 max-w-[340px] text-[13.5px] leading-relaxed text-plomo">
+        Elegí cómo vas a usar Parkit: el rol define qué pantallas ves.
+      </p>
+    </header>
+
+    <div class="rounded-tarjeta border border-borde bg-papel p-6 shadow-flotante lg:p-7">
+      <form class="flex flex-col gap-4" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+        <fieldset class="flex flex-col">
+          <legend class="label-campo mb-2">Voy a usar Parkit como</legend>
+          <div class="grid grid-cols-2 gap-2.5">
+            @for (opcion of opcionesRol; track opcion.valor) {
+              <label class="opcion-rol">
+                <input class="sr-only" type="radio" formControlName="rol" [value]="opcion.valor" />
+                <span class="text-[14px] font-semibold text-tinta">{{ opcion.titulo }}</span>
+                <span class="text-[12px] leading-snug text-plomo">{{ opcion.descripcion }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="campo">
+            <span class="label-campo">Nombre</span>
+            <input type="text" formControlName="nombre" autocomplete="given-name" />
+            @if (invalido('nombre')) {
+              <span class="campo-error">Ingresá al menos 2 letras.</span>
+            }
+          </label>
+
+          <label class="campo">
+            <span class="label-campo">Apellido</span>
+            <input type="text" formControlName="apellido" autocomplete="family-name" />
+            @if (invalido('apellido')) {
+              <span class="campo-error">Ingresá al menos 2 letras.</span>
+            }
+          </label>
+        </div>
+
+        <label class="campo">
+          <span class="label-campo">Email</span>
+          <input type="email" formControlName="email" autocomplete="email" placeholder="tu@email.com" />
+          @if (invalido('email')) {
+            <span class="campo-error">Ingresá un email válido.</span>
+          }
+        </label>
+
+        <label class="campo">
+          <span class="label-campo">
+            Teléfono <span class="font-normal text-plomo">(opcional)</span>
+          </span>
+          <input type="tel" formControlName="telefono" autocomplete="tel" placeholder="11 5555 1234" />
+        </label>
+
+        <label class="campo">
+          <span class="label-campo">Contraseña</span>
+          <input type="password" formControlName="password" autocomplete="new-password" />
+          @if (invalido('password')) {
+            <span class="campo-error">Tiene que tener entre {{ passwordMin }} y {{ passwordMax }} caracteres.</span>
+          } @else {
+            <span class="campo-ayuda">Al menos {{ passwordMin }} caracteres.</span>
+          }
+        </label>
+
+        <label class="campo">
+          <span class="label-campo">Repetir contraseña</span>
+          <input type="password" formControlName="repetirPassword" autocomplete="new-password" />
+          @if (invalido('repetirPassword')) {
+            <span class="campo-error">Repetí la contraseña.</span>
+          } @else if (passwordsDistintas()) {
+            <span class="campo-error">Las contraseñas no coinciden.</span>
+          }
+        </label>
+
+        @if (error(); as mensaje) {
+          <p
+            class="rounded-control border border-ocupada/25 bg-ocupada/5 px-4 py-3 text-[13px]
+                   text-ocupada"
+            role="alert"
+          >
+            {{ mensaje }}
+          </p>
+        }
+
+        <ui-boton
+          class="mt-1"
+          variante="primario"
+          tipo="submit"
+          [bloque]="true"
+          [cargando]="enviando()"
+        >
+          Crear cuenta
+        </ui-boton>
+      </form>
+    </div>
+
+    <p class="mt-6 text-center text-[13px] text-plomo">
+      ¿Ya tenés cuenta?
+      <a class="font-semibold text-acento hover:text-acento-fuerte" routerLink="/ingresar">Ingresá</a>
+    </p>
+  </div>
+</div>

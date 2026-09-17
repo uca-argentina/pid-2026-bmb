@@ -1,13 +1,13 @@
 import { Id } from './api.model';
 import { TipoVehiculo } from './vehiculo.model';
 
-export type EstadoCochera = 'LIBRE' | 'OCUPADA' | 'RESERVADA' | 'MANTENIMIENTO';
+export type EstadoCochera = 'LIBRE' | 'OCUPADA' | 'RESERVADA' | 'INACTIVA';
 
 export const ETIQUETA_ESTADO_COCHERA: Record<EstadoCochera, string> = {
   LIBRE: 'Libre',
   OCUPADA: 'Ocupada',
   RESERVADA: 'Reservada',
-  MANTENIMIENTO: 'Mantenimiento',
+  INACTIVA: 'Inactiva',
 };
 
 /** Cochera individual dentro de un Estacionamiento. */
@@ -20,30 +20,24 @@ export interface Cochera {
   sector: string;
   tipoVehiculo: TipoVehiculo;
   cubierta: boolean;
+  /** Estado fisico, o RESERVADA mientras transcurre una reserva vigente. */
   estado: EstadoCochera;
-  /** FK -> Reserva.id. Presente cuando el estado es RESERVADA u OCUPADA. */
-  reservaActualId?: Id;
 }
 
-/** Agregado que devuelve `GET /api/estacionamientos/:id/ocupacion`. */
-export interface ResumenOcupacion {
+/** Payload de `POST /api/estacionamientos/:id/cocheras`. */
+export interface NuevaCochera {
   estacionamientoId: Id;
-  total: number;
-  libres: number;
-  ocupadas: number;
-  reservadas: number;
-  mantenimiento: number;
-  /** Porcentaje 0-100. */
-  porcentajeOcupacion: number;
+  identificador: string;
+  sector?: string;
+  tipoVehiculo: TipoVehiculo;
+  cubierta?: boolean;
+  estado?: EstadoCochera;
 }
-
-/** Payload de `POST /api/cocheras`. */
-export type NuevaCochera = Omit<Cochera, 'id' | 'reservaActualId'>;
 
 /** Estados en el orden en que se muestran en los filtros del tablero. */
 export const ESTADOS_COCHERA_ORDEN: { valor: EstadoCochera; etiqueta: string }[] = [
   { valor: 'LIBRE', etiqueta: 'Libres' },
   { valor: 'OCUPADA', etiqueta: 'Ocupadas' },
   { valor: 'RESERVADA', etiqueta: 'Reservadas' },
-  { valor: 'MANTENIMIENTO', etiqueta: 'Mantenimiento' },
+  { valor: 'INACTIVA', etiqueta: 'Inactivas' },
 ];

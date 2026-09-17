@@ -1,5 +1,6 @@
-import { TonoPunto } from '../components/ui/punto-estado/punto-estado';
-import { EstadoCochera, FranjaAtencion, HoraHHmm } from '../models';
+import { TonoPunto } from '@app/components/ui';
+import { DiaSemana, EstadoCochera, FranjaAtencion, HoraHHmm } from '@app/models';
+import { aFechaISO, diaSemanaDe } from './fecha.util';
 
 /**
  * Regla de disponibilidad del handoff:
@@ -21,13 +22,18 @@ export const TONO_ESTADO_COCHERA: Record<EstadoCochera, TonoPunto> = {
   LIBRE: 'acento',
   OCUPADA: 'ocupada',
   RESERVADA: 'reservada',
-  MANTENIMIENTO: 'reservada',
+  INACTIVA: 'reservada',
 };
 
-/** `07 – 23 h`, o `24 h` cuando el estacionamiento no cierra. */
-export function resumenHorario(horarios: FranjaAtencion[]): string {
-  const franja = horarios[0];
-  if (!franja) return 'Sin horario';
+/** Horario de hoy: `07 – 23 h`, `24 h` si no cierra, o `Cerrado hoy`. */
+export function resumenHorario(
+  horarios: FranjaAtencion[],
+  hoy: DiaSemana = diaSemanaDe(aFechaISO(new Date())),
+): string {
+  if (horarios.length === 0) return 'Sin horario';
+
+  const franja = horarios.find((h) => h.dia === hoy);
+  if (!franja) return 'Cerrado hoy';
   if (esJornadaCompleta(franja.desde, franja.hasta)) return '24 h';
   return `${franja.desde.slice(0, 2)} – ${franja.hasta.slice(0, 2)} h`;
 }

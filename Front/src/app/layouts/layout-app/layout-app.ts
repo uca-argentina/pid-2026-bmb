@@ -1,20 +1,24 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { BarraLateral } from '../../components/layout/barra-lateral/barra-lateral';
-import { ItemNavegacion } from '../../components/layout/navegacion.model';
-import { TabsInferior } from '../../components/layout/tabs-inferior/tabs-inferior';
-import { RolUsuario } from '../../models';
-import { AuthService } from '../../services/auth.service';
+import { BarraLateral, ItemNavegacion, TabsInferior } from '@app/components/layout';
+import { Logo } from '@app/components/ui';
+import { inicioSegunRol } from '@app/guards/rol.guard';
+import { ETIQUETA_ROL, RolUsuario } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
 /** Navegacion de cada rol. El guard ya garantizo que el rol corresponde. */
 const NAVEGACION: Record<RolUsuario, ItemNavegacion[]> = {
   CONDUCTOR: [
-    { ruta: '/conductor/explorar', etiqueta: 'Explorar' },
-    { ruta: '/conductor/mis-reservas', etiqueta: 'Mis reservas' },
+    { ruta: '/conductor/explorar', etiqueta: 'Explorar', icono: 'explorar' },
+    { ruta: '/conductor/mis-reservas', etiqueta: 'Mis reservas', icono: 'reservas' },
+    { ruta: '/conductor/vehiculos', etiqueta: 'Vehículos', icono: 'auto' },
+    { ruta: '/conductor/perfil', etiqueta: 'Perfil', icono: 'perfil' },
   ],
   PROPIETARIO: [
-    { ruta: '/propietario/tablero', etiqueta: 'Panel' },
-    { ruta: '/propietario/reservas', etiqueta: 'Reservas' },
+    { ruta: '/propietario/tablero', etiqueta: 'Panel', icono: 'tablero' },
+    { ruta: '/propietario/reservas', etiqueta: 'Reservas', icono: 'reservas' },
+    { ruta: '/propietario/estacionamientos', etiqueta: 'Estacionamientos', icono: 'estacionamiento' },
+    { ruta: '/propietario/perfil', etiqueta: 'Perfil', icono: 'perfil' },
   ],
 };
 
@@ -25,7 +29,7 @@ const NAVEGACION: Record<RolUsuario, ItemNavegacion[]> = {
 @Component({
   selector: 'app-layout-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, TabsInferior, BarraLateral],
+  imports: [RouterOutlet, TabsInferior, BarraLateral, Logo],
   templateUrl: './layout-app.html',
 })
 export class LayoutApp {
@@ -37,6 +41,33 @@ export class LayoutApp {
     const rol = this.auth.rol();
     return rol ? NAVEGACION[rol] : [];
   });
+
+  /** Perfil al que se puede pasar; `null` si el usuario tiene uno solo. */
+  protected readonly rolAlternativo = computed<RolUsuario | null>(() => {
+    const usuario = this.usuario();
+    return usuario?.roles.find((rol) => rol !== usuario.rol) ?? null;
+  });
+
+  protected readonly etiquetaRolAlternativo = computed(() => {
+    const rol = this.rolAlternativo();
+    return rol ? ETIQUETA_ROL[rol] : '';
+  });
+
+  protected readonly cambiandoRol = signal(false);
+
+  protected cambiarRol(): void {
+    const rol = this.rolAlternativo();
+    if (!rol || this.cambiandoRol()) return;
+
+    this.cambiandoRol.set(true);
+    this.auth.cambiarRol(rol).subscribe({
+      next: (sesion) => {
+        this.cambiandoRol.set(false);
+        void this.router.navigateByUrl(inicioSegunRol(sesion.usuario.rol));
+      },
+      error: () => this.cambiandoRol.set(false),
+    });
+  }
 
   protected salir(): void {
     this.auth.logout();

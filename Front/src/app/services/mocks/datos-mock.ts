@@ -1,18 +1,11 @@
-import { aFechaISO } from '../../utils/fecha.util';
-import {
-  Cochera,
-  EstadoCochera,
-  Estacionamiento,
-  Reserva,
-  ResumenDiario,
-  Usuario,
-  Vehiculo,
-} from '../../models';
+import { aFechaISO } from '@app/utils/fecha.util';
+import { Cochera, Estacionamiento, EstadoCochera, Reserva, Usuario, Vehiculo } from '@app/models';
 
 /* -------------------------------------------------------------------------
    Datos de ejemplo tomados del handoff de diseno ("Claude design/README.md"),
-   con la forma exacta que devolvera la API de Express.
-   Se borran cuando `environment.usarMocks` pase a false.
+   con la forma de los modelos del front. Se usan solo cuando
+   `environment.usarMocks` es true; contra la API real, `npm run db:demo` en el
+   backend carga usuarios equivalentes.
 ------------------------------------------------------------------------- */
 
 /** Las reservas de ejemplo se anclan al dia en curso para que el panel
@@ -27,9 +20,10 @@ export const USUARIOS_MOCK: Usuario[] = [
     id: ID_CONDUCTOR,
     nombre: 'Martina',
     apellido: 'Álvarez',
-    email: 'conductor@ucaio.com',
+    email: 'conductor@parkit.com',
     telefono: '+54 9 11 5555 1234',
     rol: 'CONDUCTOR',
+    roles: ['CONDUCTOR'],
     fechaAlta: '2026-02-11T13:20:00.000Z',
     activo: true,
   },
@@ -37,9 +31,10 @@ export const USUARIOS_MOCK: Usuario[] = [
     id: ID_PROPIETARIO,
     nombre: 'Matias',
     apellido: 'Álvarez',
-    email: 'propietario@ucaio.com',
+    email: 'propietario@parkit.com',
     telefono: '+54 9 11 4444 8899',
     rol: 'PROPIETARIO',
+    roles: ['PROPIETARIO'],
     fechaAlta: '2025-11-03T09:00:00.000Z',
     activo: true,
   },
@@ -55,6 +50,7 @@ export const VEHICULOS_MOCK: Vehiculo[] = [
     color: 'Gris',
     tipo: 'AUTO',
     predeterminado: true,
+    activo: true,
   },
   {
     id: 'veh-2',
@@ -65,6 +61,7 @@ export const VEHICULOS_MOCK: Vehiculo[] = [
     color: 'Negro',
     tipo: 'MOTO',
     predeterminado: false,
+    activo: true,
   },
   // Vehiculos de otros conductores: aparecen en las reservas del propietario.
   {
@@ -76,6 +73,7 @@ export const VEHICULOS_MOCK: Vehiculo[] = [
     color: 'Blanco',
     tipo: 'CAMIONETA',
     predeterminado: true,
+    activo: true,
   },
   {
     id: 'veh-4',
@@ -86,6 +84,7 @@ export const VEHICULOS_MOCK: Vehiculo[] = [
     color: 'Azul',
     tipo: 'AUTO',
     predeterminado: true,
+    activo: true,
   },
 ];
 
@@ -104,8 +103,9 @@ export const ESTACIONAMIENTOS_MOCK: Estacionamiento[] = [
       latitud: -34.6118,
       longitud: -58.3833,
     },
+    barrioZona: 'Monserrat',
     telefonoContacto: '+54 11 4311 2200',
-    emailContacto: 'belgrano@ucaio.com',
+    emailContacto: 'belgrano@parkit.com',
     horarios: [
       { dia: 'LUNES', desde: '07:00', hasta: '23:00' },
       { dia: 'MARTES', desde: '07:00', hasta: '23:00' },
@@ -118,8 +118,8 @@ export const ESTACIONAMIENTOS_MOCK: Estacionamiento[] = [
     cocherasDisponibles: 12,
     tiposAdmitidos: ['AUTO', 'MOTO'],
     cubierto: true,
-    calificacion: 4.8,
     distanciaKm: 0.35,
+    publicado: true,
     activo: true,
   },
   {
@@ -136,16 +136,17 @@ export const ESTACIONAMIENTOS_MOCK: Estacionamiento[] = [
       latitud: -34.6092,
       longitud: -58.3789,
     },
+    barrioZona: 'San Nicolás',
     telefonoContacto: '+54 11 4890 7711',
-    emailContacto: 'sur@ucaio.com',
+    emailContacto: 'sur@parkit.com',
     horarios: [{ dia: 'LUNES', desde: '00:00', hasta: '23:59' }],
     precioPorHora: 750,
     cocherasTotales: 20,
     cocherasDisponibles: 3,
     tiposAdmitidos: ['AUTO', 'CAMIONETA'],
     cubierto: false,
-    calificacion: 4.2,
     distanciaKm: 0.7,
+    publicado: true,
     activo: true,
   },
   {
@@ -162,16 +163,17 @@ export const ESTACIONAMIENTOS_MOCK: Estacionamiento[] = [
       latitud: -34.6032,
       longitud: -58.3722,
     },
+    barrioZona: 'San Nicolás',
     telefonoContacto: '+54 11 4832 5566',
-    emailContacto: 'norte@ucaio.com',
+    emailContacto: 'norte@parkit.com',
     horarios: [{ dia: 'LUNES', desde: '08:00', hasta: '20:00' }],
     precioPorHora: 1150,
     cocherasTotales: 26,
     cocherasDisponibles: 0,
     tiposAdmitidos: ['AUTO', 'CAMIONETA'],
     cubierto: true,
-    calificacion: 4.5,
     distanciaKm: 1.2,
+    publicado: true,
     activo: true,
   },
   {
@@ -188,16 +190,17 @@ export const ESTACIONAMIENTOS_MOCK: Estacionamiento[] = [
       latitud: -34.6055,
       longitud: -58.4001,
     },
+    barrioZona: 'Balvanera',
     telefonoContacto: '+54 11 4785 0044',
-    emailContacto: 'tilos@ucaio.com',
+    emailContacto: 'tilos@parkit.com',
     horarios: [{ dia: 'LUNES', desde: '06:00', hasta: '22:00' }],
     precioPorHora: 680,
     cocherasTotales: 30,
     cocherasDisponibles: 21,
     tiposAdmitidos: ['MOTO', 'AUTO'],
     cubierto: false,
-    calificacion: 4.0,
     distanciaKm: 1.8,
+    publicado: true,
     activo: true,
   },
 ];
@@ -229,20 +232,8 @@ export const COCHERAS_MOCK: Cochera[] = ESTADOS_BELGRANO.map((estado, i) => {
     tipoVehiculo: i % 4 === 3 ? 'MOTO' : 'AUTO',
     cubierta: true,
     estado,
-    reservaActualId: estado === 'LIBRE' ? undefined : 'res-1',
   } satisfies Cochera;
 });
-
-export const RESUMEN_DIARIO_MOCK: Record<string, () => ResumenDiario> = {
-  'est-1': () => ({
-    estacionamientoId: 'est-1',
-    reservasHoy: 9,
-    cocherasLibres: 6,
-    ingresosDelDia: 8100,
-    // El backend devuelve el momento del ultimo refresco.
-    actualizadoEn: new Date().toISOString(),
-  }),
-};
 
 export const RESERVAS_MOCK: Reserva[] = [
   {
@@ -250,6 +241,7 @@ export const RESERVAS_MOCK: Reserva[] = [
     conductorId: ID_CONDUCTOR,
     estacionamientoId: 'est-1',
     cocheraId: 'est-1-coc-A2',
+    cocheraIdentificador: 'A2',
     vehiculoId: 'veh-1',
     fecha: HOY,
     horaDesde: '10:00',
@@ -257,12 +249,15 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'EN_CURSO',
     precioTotal: 2700,
     creadaEn: '2026-09-03T18:41:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
   {
     id: 'res-2',
     conductorId: 'usr-conductor-2',
     estacionamientoId: 'est-1',
     cocheraId: 'est-1-coc-A6',
+    cocheraIdentificador: 'A6',
     vehiculoId: 'veh-3',
     fecha: HOY,
     horaDesde: '13:00',
@@ -270,12 +265,15 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'CONFIRMADA',
     precioTotal: 2250,
     creadaEn: '2026-09-03T20:02:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
   {
     id: 'res-3',
     conductorId: 'usr-conductor-3',
     estacionamientoId: 'est-1',
     cocheraId: 'est-1-coc-B3',
+    cocheraIdentificador: 'B3',
     vehiculoId: 'veh-4',
     fecha: HOY,
     horaDesde: '16:00',
@@ -283,12 +281,15 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'CONFIRMADA',
     precioTotal: 3600,
     creadaEn: '2026-09-03T21:15:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
   {
     id: 'res-4',
     conductorId: ID_CONDUCTOR,
     estacionamientoId: 'est-4',
     cocheraId: null,
+    cocheraIdentificador: null,
     vehiculoId: 'veh-2',
     fecha: '2026-08-28',
     horaDesde: '17:00',
@@ -296,5 +297,7 @@ export const RESERVAS_MOCK: Reserva[] = [
     estado: 'FINALIZADA',
     precioTotal: 2720,
     creadaEn: '2026-08-27T15:05:00.000Z',
+    ingresoEn: null,
+    egresoEn: null,
   },
 ];

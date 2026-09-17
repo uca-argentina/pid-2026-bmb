@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { RolUsuario } from '../models';
-import { AuthService } from '../services/auth.service';
+import { RolUsuario } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
 /** Ruta de inicio segun el rol, para redirigir cuando el acceso no corresponde. */
 export function inicioSegunRol(rol: RolUsuario | null): string {

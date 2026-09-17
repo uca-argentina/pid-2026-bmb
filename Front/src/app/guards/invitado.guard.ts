@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '@app/services/auth.service';
 import { inicioSegunRol } from './rol.guard';
 
 /** Con sesion activa, /ingresar redirige al inicio que corresponde al rol. */

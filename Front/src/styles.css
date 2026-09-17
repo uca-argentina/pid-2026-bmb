@@ -122,28 +122,113 @@
     color: var(--color-tinta);
   }
 
+  /* Campo de formulario: label arriba e input con anillo del acento al foco.
+     Lo comparten ingresar, registro y los formularios de alta. */
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .campo input {
+    padding: 12px 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-control);
+    background: var(--color-papel);
+    color: var(--color-tinta);
+    font: inherit;
+    font-size: 14px;
+    transition:
+      border-color 160ms var(--ease-suave),
+      box-shadow 160ms var(--ease-suave);
+  }
+
+  .campo input::placeholder {
+    color: var(--color-humo);
+  }
+
+  /* El anillo tenue reemplaza al `outline: none` del prototipo: el foco sigue
+     siendo visible por teclado y ademas se ve al hacer clic. */
+  .campo input:focus {
+    border-color: var(--color-acento);
+    box-shadow: 0 0 0 3px var(--color-acento-suave);
+    outline: none;
+  }
+
+  .campo input:focus-visible {
+    outline: 2px solid var(--color-acento);
+    outline-offset: 2px;
+  }
+
+  .campo input.ng-touched.ng-invalid {
+    border-color: var(--color-ocupada);
+  }
+
+  .campo input.ng-touched.ng-invalid:focus {
+    box-shadow: 0 0 0 3px rgb(220 38 38 / 0.12);
+  }
+
+  /* Texto de ayuda y de error debajo de un campo. */
+  .campo-ayuda {
+    font-size: 12px;
+    color: var(--color-plomo);
+  }
+
+  .campo-error {
+    font-size: 12px;
+    color: var(--color-ocupada);
+  }
+
   .num-tabular {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Marca: cuadrado del acento con la inicial, usada en login, sidebar y
-     header mobile. Reemplaza al texto suelto "UCAio". */
-  .marca-logo {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    border-radius: 8px;
-    background: linear-gradient(
-      140deg,
-      var(--color-acento) 0%,
-      var(--color-acento-fuerte) 100%
-    );
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+  /* ------------------------------------------------------------------
+     Entradas. Una sola idea en toda la app: lo que aparece sube 6px con un
+     fundido corto. La usan las pantallas al navegar, las listas y los avisos.
+     `prefers-reduced-motion` las apaga (regla en @layer base).
+  ------------------------------------------------------------------ */
+  .aparece {
+    animation: aparecer var(--duracion-entrada) var(--ease-suave) both;
+  }
+
+  /* Cada elemento de la lista entra apenas despues del anterior. */
+  .aparece-en-cadena > * {
+    animation: aparecer var(--duracion-entrada) var(--ease-suave) both;
+  }
+
+  .aparece-en-cadena > *:nth-child(2) {
+    animation-delay: 40ms;
+  }
+
+  .aparece-en-cadena > *:nth-child(3) {
+    animation-delay: 80ms;
+  }
+
+  .aparece-en-cadena > *:nth-child(4) {
+    animation-delay: 120ms;
+  }
+
+  .aparece-en-cadena > *:nth-child(5) {
+    animation-delay: 160ms;
+  }
+
+  /* A partir del sexto ya no se nota la cascada y alarga la espera. */
+  .aparece-en-cadena > *:nth-child(n + 6) {
+    animation-delay: 200ms;
+  }
+
+  /* Los mensajes de error y de confirmacion aparecen despues de una accion:
+     que entren solos evita que el bloque salte de golpe. El skeleton queda
+     afuera porque entra junto con la pantalla. */
+  [role='alert'],
+  [role='status']:not(ui-cargando *) {
+    animation: aparecer 180ms var(--ease-suave) both;
+  }
+
+  /* Confirmaciones: el circulo del tilde crece apenas al aparecer. */
+  .surge {
+    animation: surgir var(--duracion-entrada) var(--ease-suave) both;
   }
 
   /* Barrido de los skeletons de carga. */
@@ -156,6 +241,28 @@
     );
     background-size: 200% 100%;
     animation: esqueleto-barrido 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

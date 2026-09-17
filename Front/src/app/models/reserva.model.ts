@@ -1,7 +1,7 @@
 import { FechaHoraISO, FechaISO, HoraHHmm, Id } from './api.model';
 import { Cochera } from './cochera.model';
 import { Estacionamiento } from './estacionamiento.model';
-import { Vehiculo } from './vehiculo.model';
+import { TipoVehiculo, Vehiculo } from './vehiculo.model';
 
 export type EstadoReserva =
   | 'PENDIENTE'
@@ -27,6 +27,7 @@ export interface Reserva {
   estacionamientoId: Id;
   /** FK -> Cochera.id. La asigna el backend al confirmar. */
   cocheraId: Id | null;
+  cocheraIdentificador: string | null;
   /** FK -> Vehiculo.id. */
   vehiculoId: Id;
   fecha: FechaISO;
@@ -35,7 +36,9 @@ export interface Reserva {
   estado: EstadoReserva;
   precioTotal: number;
   creadaEn: FechaHoraISO;
-  canceladaEn?: FechaHoraISO;
+  /** Horas reales que registra el propietario. */
+  ingresoEn: FechaHoraISO | null;
+  egresoEn: FechaHoraISO | null;
 }
 
 /**
@@ -48,7 +51,7 @@ export interface ReservaDetallada extends Reserva {
   cochera: Pick<Cochera, 'id' | 'identificador' | 'sector'> | null;
 }
 
-/** Payload de `POST /api/reservas`. */
+/** Datos que junta el flujo de reserva: vehiculo, fecha y franja horaria. */
 export interface NuevaReserva {
   estacionamientoId: Id;
   vehiculoId: Id;
@@ -61,10 +64,10 @@ export interface NuevaReserva {
 export interface ConsultaDisponibilidad {
   estacionamientoId: Id;
   fecha: FechaISO;
-  tipoVehiculo?: string;
+  tipoVehiculo?: TipoVehiculo | null;
 }
 
-/** Franja de una hora ofrecida por el backend para una fecha dada. */
+/** Franja ofrecida por el backend para una fecha dada. */
 export interface FranjaDisponible {
   horaDesde: HoraHHmm;
   horaHasta: HoraHHmm;

@@ -1,18 +1,22 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Boton } from '../../components/ui';
-import { inicioSegunRol } from '../../guards/rol.guard';
-import { Credenciales, RolUsuario } from '../../models';
-import { AuthService } from '../../services/auth.service';
+import { Router, RouterLink } from '@angular/router';
+import { Boton } from '@app/components/ui';
+import { inicioSegunRol } from '@app/guards/rol.guard';
+import { Credenciales, RolUsuario } from '@app/models';
+import { AuthService } from '@app/services/auth.service';
 
-/** Ingreso a la app. Define que rama de rutas ve el usuario. */
+/**
+ * Pantalla `/ingresar` · publica
+ *
+ * Ingreso a la app: el rol de la sesion define que rama de rutas ve el usuario.
+ */
 @Component({
   selector: 'app-ingresar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Boton],
+  imports: [ReactiveFormsModule, RouterLink, Boton, NgOptimizedImage],
   templateUrl: './ingresar.html',
-  styleUrl: './ingresar.css',
 })
 export class Ingresar {
   private readonly auth = inject(AuthService);
@@ -27,7 +31,10 @@ export class Ingresar {
   protected readonly enviando = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  /** Accesos de demostracion mientras los servicios corren con mocks. */
+  /**
+   * Accesos de demostracion: existen en los mocks y, contra la API, los carga
+   * `npm run db:demo` en el backend.
+   */
   protected readonly demos: { rol: RolUsuario; etiqueta: string; email: string }[] = [
     { rol: 'CONDUCTOR', etiqueta: 'Entrar como conductor', email: 'conductor@test.com' },
     { rol: 'PROPIETARIO', etiqueta: 'Entrar como propietario', email: 'propietario@test.com' },

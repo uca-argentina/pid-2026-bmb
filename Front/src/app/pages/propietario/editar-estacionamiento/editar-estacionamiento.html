@@ -1,0 +1,101 @@
+<div class="aparece mx-auto w-full max-w-[720px] px-6 pt-5 pb-8 lg:px-10 lg:pt-[34px] lg:pb-11">
+  <div class="flex flex-col gap-6">
+    <header>
+      <a
+        class="inline-flex items-center gap-1.5 rounded-boton text-[12px] font-medium text-plomo
+               transition-colors duration-160 ease-out hover:text-acento"
+        routerLink="/propietario/estacionamientos"
+      >
+        ← Mis estacionamientos
+      </a>
+      <p class="eyebrow mt-3">Propietario</p>
+      <h1 class="titulo-vista mt-1.5">Editar estacionamiento</h1>
+    </header>
+
+    @if (recurso.isLoading()) {
+      <ui-cargando [cantidad]="2" />
+    } @else if (recurso.error(); as error) {
+      <ui-estado-vacio titulo="No pudimos cargar el estacionamiento" [descripcion]="error.message">
+        <ui-boton (presionado)="recurso.reload()">Reintentar</ui-boton>
+      </ui-estado-vacio>
+    } @else if (recurso.value(); as estacionamiento) {
+      @if (!estacionamiento.activo) {
+        <ui-estado-vacio
+          titulo="Este estacionamiento está dado de baja"
+          descripcion="Ya no se puede editar ni publicar, y sus cocheras quedaron inactivas."
+        >
+          <ui-boton variante="primario" routerLink="/propietario/estacionamientos">
+            Ir a mis estacionamientos
+          </ui-boton>
+        </ui-estado-vacio>
+      } @else {
+        <section
+          class="flex flex-col gap-3 rounded-tarjeta border border-borde bg-papel px-5 py-4
+                 shadow-tarjeta lg:flex-row lg:items-center lg:justify-between lg:gap-6"
+          aria-labelledby="titulo-publicacion"
+        >
+          <div>
+            <h2 id="titulo-publicacion" class="text-[14px] font-semibold text-tinta">
+              {{ estacionamiento.publicado ? 'Publicado' : 'Sin publicar' }}
+            </h2>
+            <p class="mt-0.5 text-[13px] text-plomo">
+              @if (estacionamiento.publicado) {
+                Los conductores lo ven en la búsqueda y pueden reservar.
+              } @else {
+                No aparece en la búsqueda. Las reservas ya hechas siguen en pie.
+              }
+            </p>
+          </div>
+          <ui-boton [cargando]="publicando()" (presionado)="alternarPublicacion()">
+            {{ estacionamiento.publicado ? 'Despublicar' : 'Publicar' }}
+          </ui-boton>
+        </section>
+
+        @if (aviso(); as mensaje) {
+          <p
+            class="rounded-control border border-exito/25 bg-exito-suave px-4 py-3 text-[13px]
+                   text-exito"
+            role="status"
+          >
+            {{ mensaje }}
+          </p>
+        }
+
+        <app-formulario-estacionamiento
+          textoEnviar="Guardar cambios"
+          [estacionamiento]="estacionamiento"
+          [enviando]="enviando()"
+          [error]="error()"
+          (guardar)="guardar($event)"
+        />
+
+        <section
+          class="flex flex-col gap-3 rounded-tarjeta border border-ocupada/20 bg-ocupada/[0.03]
+                 px-5 py-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6"
+          aria-labelledby="titulo-baja"
+        >
+          <div>
+            <h2 id="titulo-baja" class="text-[14px] font-semibold text-tinta">
+              Dar de baja el estacionamiento
+            </h2>
+            <p class="mt-0.5 text-[13px] text-plomo">
+              Se cancelan las reservas que todavía no empezaron y sus cocheras quedan inactivas.
+            </p>
+          </div>
+          <ui-boton variante="peligro" [cargando]="borrando()" (presionado)="darDeBaja()">
+            Dar de baja
+          </ui-boton>
+        </section>
+      }
+    } @else {
+      <ui-estado-vacio
+        titulo="Ese estacionamiento no existe"
+        descripcion="Puede que lo hayas dado de baja o que el enlace esté mal."
+      >
+        <ui-boton variante="primario" routerLink="/propietario/estacionamientos">
+          Ir a mis estacionamientos
+        </ui-boton>
+      </ui-estado-vacio>
+    }
+  </div>
+</div>
