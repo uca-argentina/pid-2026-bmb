@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ETIQUETA_ROL, iniciales, nombreCorto, RolUsuario, Usuario } from '@app/models';
 import { ItemNavegacion } from '@app/components/layout';
+import { Icono, Logo } from '@app/components/ui';
 
 /** Nav lateral de 238px que reemplaza a la tab bar en >= 1024px. */
 @Component({
   selector: 'app-barra-lateral',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, Icono, Logo],
   templateUrl: './barra-lateral.html',
   host: { class: 'block h-full' },
 })

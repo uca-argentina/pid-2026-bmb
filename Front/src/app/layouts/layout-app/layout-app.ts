@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { BarraLateral, ItemNavegacion, TabsInferior } from '@app/components/layout';
+import { Logo } from '@app/components/ui';
 import { inicioSegunRol } from '@app/guards/rol.guard';
 import { ETIQUETA_ROL, RolUsuario } from '@app/models';
 import { AuthService } from '@app/services/auth.service';
@@ -8,16 +9,16 @@ import { AuthService } from '@app/services/auth.service';
 /** Navegacion de cada rol. El guard ya garantizo que el rol corresponde. */
 const NAVEGACION: Record<RolUsuario, ItemNavegacion[]> = {
   CONDUCTOR: [
-    { ruta: '/conductor/explorar', etiqueta: 'Explorar' },
-    { ruta: '/conductor/mis-reservas', etiqueta: 'Mis reservas' },
-    { ruta: '/conductor/vehiculos', etiqueta: 'Vehículos' },
-    { ruta: '/conductor/perfil', etiqueta: 'Perfil' },
+    { ruta: '/conductor/explorar', etiqueta: 'Explorar', icono: 'explorar' },
+    { ruta: '/conductor/mis-reservas', etiqueta: 'Mis reservas', icono: 'reservas' },
+    { ruta: '/conductor/vehiculos', etiqueta: 'Vehículos', icono: 'auto' },
+    { ruta: '/conductor/perfil', etiqueta: 'Perfil', icono: 'perfil' },
   ],
   PROPIETARIO: [
-    { ruta: '/propietario/tablero', etiqueta: 'Panel' },
-    { ruta: '/propietario/reservas', etiqueta: 'Reservas' },
-    { ruta: '/propietario/estacionamientos', etiqueta: 'Estacionamientos' },
-    { ruta: '/propietario/perfil', etiqueta: 'Perfil' },
+    { ruta: '/propietario/tablero', etiqueta: 'Panel', icono: 'tablero' },
+    { ruta: '/propietario/reservas', etiqueta: 'Reservas', icono: 'reservas' },
+    { ruta: '/propietario/estacionamientos', etiqueta: 'Estacionamientos', icono: 'estacionamiento' },
+    { ruta: '/propietario/perfil', etiqueta: 'Perfil', icono: 'perfil' },
   ],
 };
 
@@ -28,7 +29,7 @@ const NAVEGACION: Record<RolUsuario, ItemNavegacion[]> = {
 @Component({
   selector: 'app-layout-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, TabsInferior, BarraLateral],
+  imports: [RouterOutlet, TabsInferior, BarraLateral, Logo],
   templateUrl: './layout-app.html',
 })
 export class LayoutApp {

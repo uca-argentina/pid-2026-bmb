@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,7 +15,7 @@ import { AuthService } from '@app/services/auth.service';
 @Component({
   selector: 'app-ingresar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, Boton],
+  imports: [ReactiveFormsModule, RouterLink, Boton, NgOptimizedImage],
   templateUrl: './ingresar.html',
 })
 export class Ingresar {
