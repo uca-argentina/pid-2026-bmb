@@ -11,4 +11,5 @@ export * from './cargando/cargando';
 export * from './kpi/kpi';
 export * from './icono/icono';
 export * from './logo/logo';
+export * from './miniatura/miniatura';
 export * from './modal/modal';

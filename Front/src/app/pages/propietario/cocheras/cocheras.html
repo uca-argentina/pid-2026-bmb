@@ -41,11 +41,14 @@
                          px-5 py-[13px] first:border-t-0 lg:px-6"
                   [class.bg-acento-suave]="editando()?.id === cochera.id"
                 >
-                  <div class="min-w-0">
-                    <p class="num-tabular text-[14px] font-semibold text-tinta">
-                      {{ cochera.identificador }}
-                    </p>
-                    <p class="mt-0.5 text-[12px] text-plomo">{{ detalle(cochera) }}</p>
+                  <div class="flex min-w-0 items-center gap-3.5">
+                    <app-foto-cochera [cochera]="cochera" />
+                    <div class="min-w-0">
+                      <p class="num-tabular text-[14px] font-semibold text-tinta">
+                        {{ cochera.identificador }}
+                      </p>
+                      <p class="mt-0.5 text-[12px] text-plomo">{{ detalle(cochera) }}</p>
+                    </div>
                   </div>
 
                   <div class="flex items-center gap-2">
