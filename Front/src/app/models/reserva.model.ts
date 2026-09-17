@@ -75,14 +75,6 @@ export interface FranjaDisponible {
   cocherasLibres: number;
 }
 
-/** Franjas que ofrece el estacionamiento, segun el handoff de diseno. */
-export const FRANJAS_ESTANDAR: { horaDesde: HoraHHmm; horaHasta: HoraHHmm }[] = [
-  { horaDesde: '08:00', horaHasta: '10:00' },
-  { horaDesde: '10:00', horaHasta: '13:00' },
-  { horaDesde: '13:00', horaHasta: '17:00' },
-  { horaDesde: '17:00', horaHasta: '21:00' },
-];
-
 /** Estado del formulario de reserva mientras el usuario lo completa. */
 export interface BorradorReserva {
   estacionamientoId: Id | null;

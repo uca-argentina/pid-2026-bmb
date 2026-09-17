@@ -10,16 +10,6 @@ export type DiaSemana =
   | 'SABADO'
   | 'DOMINGO';
 
-export const DIAS_SEMANA: DiaSemana[] = [
-  'LUNES',
-  'MARTES',
-  'MIERCOLES',
-  'JUEVES',
-  'VIERNES',
-  'SABADO',
-  'DOMINGO',
-];
-
 export interface FranjaAtencion {
   dia: DiaSemana;
   desde: HoraHHmm;
@@ -73,11 +63,6 @@ export interface FiltrosEstacionamiento {
 }
 
 export type OrdenEstacionamiento = 'DISTANCIA' | 'PRECIO';
-
-export const ETIQUETA_ORDEN: Record<OrdenEstacionamiento, string> = {
-  DISTANCIA: 'Cercania',
-  PRECIO: 'Precio',
-};
 
 /** Payload de `POST /api/estacionamientos`. */
 export interface NuevoEstacionamiento {

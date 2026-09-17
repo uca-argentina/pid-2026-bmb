@@ -26,7 +26,7 @@ export class Estacionamientos {
 
   protected readonly recurso = rxResource({
     params: () => this.auth.usuario()?.id,
-    stream: ({ params }) => this.estacionamientos.listarDelPropietario(params),
+    stream: () => this.estacionamientos.listarDelPropietario(),
     defaultValue: [] as Estacionamiento[],
   });
 }

@@ -1,12 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
-import { environment } from '@env/environment';
 import { CambiosPerfil, Credenciales, RegistroUsuario, RolUsuario, SesionAuth, Usuario } from '@app/models';
 import { SesionDto, UsuarioDto } from './api/api.dto';
 import { aPayloadRegistro, aSesion, aUsuario } from './api/api.mapeo';
-import { USUARIOS_MOCK } from './mocks/datos-mock';
-import { clonar, simular, simularError } from './mocks/mock.util';
 
 const CLAVE_SESION = 'parkit.sesion';
 
@@ -35,16 +32,6 @@ export class AuthService {
 
   /** `POST /api/auth/login` */
   login(credenciales: Credenciales): Observable<SesionAuth> {
-    if (environment.usarMocks) {
-      const usuario = USUARIOS_MOCK.find((u) => u.email === credenciales.email);
-      if (!usuario) {
-        return simularError<SesionAuth>('Email o contrasena incorrectos');
-      }
-      return simular<SesionAuth>({ token: `mock-token-${usuario.id}`, usuario: clonar(usuario) }).pipe(
-        tap((sesion) => this.guardarSesion(sesion)),
-      );
-    }
-
     return this.http.post<SesionDto>(`${this.ruta}/login`, credenciales).pipe(
       map(aSesion),
       tap((sesion) => this.guardarSesion(sesion)),
@@ -53,23 +40,6 @@ export class AuthService {
 
   /** `POST /api/auth/register` */
   registro(datos: RegistroUsuario): Observable<SesionAuth> {
-    if (environment.usarMocks) {
-      const usuario: Usuario = {
-        id: `usr-${crypto.randomUUID()}`,
-        nombre: datos.nombre,
-        apellido: datos.apellido,
-        email: datos.email,
-        telefono: datos.telefono ?? null,
-        rol: datos.rol,
-        roles: [datos.rol],
-        fechaAlta: new Date().toISOString(),
-        activo: true,
-      };
-      return simular<SesionAuth>({ token: `mock-token-${usuario.id}`, usuario }).pipe(
-        tap((sesion) => this.guardarSesion(sesion)),
-      );
-    }
-
     return this.http.post<SesionDto>(`${this.ruta}/register`, aPayloadRegistro(datos)).pipe(
       map(aSesion),
       tap((sesion) => this.guardarSesion(sesion)),
@@ -78,11 +48,6 @@ export class AuthService {
 
   /** `GET /api/auth/me` */
   perfil(): Observable<Usuario> {
-    if (environment.usarMocks) {
-      const usuario = this.usuario();
-      return usuario ? simular(clonar(usuario)) : simularError<Usuario>('No hay sesion activa');
-    }
-
     return this.http
       .get<{ usuario: UsuarioDto }>(`${this.ruta}/me`)
       .pipe(map((respuesta) => aUsuario(respuesta.usuario)));
@@ -90,16 +55,6 @@ export class AuthService {
 
   /** `POST /api/auth/rol`: cambia el perfil activo y reemplaza el token. */
   cambiarRol(rol: RolUsuario): Observable<SesionAuth> {
-    if (environment.usarMocks) {
-      const sesion = this.sesion();
-      if (!sesion || !sesion.usuario.roles.includes(rol)) {
-        return simularError<SesionAuth>(`El usuario no tiene habilitado el perfil ${rol}`);
-      }
-      return simular<SesionAuth>({ ...sesion, usuario: { ...clonar(sesion.usuario), rol } }).pipe(
-        tap((nueva) => this.guardarSesion(nueva)),
-      );
-    }
-
     return this.http.post<SesionDto>(`${this.ruta}/rol`, { rol }).pipe(
       map(aSesion),
       tap((sesion) => this.guardarSesion(sesion)),
@@ -108,19 +63,6 @@ export class AuthService {
 
   /** `PATCH /api/auth/me`: guarda los cambios y actualiza la sesion. */
   actualizarPerfil(cambios: CambiosPerfil): Observable<SesionAuth> {
-    if (environment.usarMocks) {
-      const sesion = this.sesion();
-      if (!sesion) return simularError<SesionAuth>('No hay sesion activa');
-
-      const { password, passwordActual, ...datos } = cambios;
-      const usuario = { ...clonar(sesion.usuario), ...datos };
-      usuario.rol = usuario.roles.includes(usuario.rol) ? usuario.rol : usuario.roles[0];
-
-      return simular<SesionAuth>({ ...sesion, usuario }).pipe(
-        tap((nueva) => this.guardarSesion(nueva)),
-      );
-    }
-
     return this.http.patch<SesionDto>(`${this.ruta}/me`, cambios).pipe(
       map(aSesion),
       tap((sesion) => this.guardarSesion(sesion)),
@@ -129,10 +71,6 @@ export class AuthService {
 
   /** `DELETE /api/auth/me`: baja de la cuenta y cierre de sesion. */
   eliminarCuenta(): Observable<void> {
-    if (environment.usarMocks) {
-      return simular<void>(undefined).pipe(tap(() => this.logout()));
-    }
-
     return this.http
       .delete<void>(`${this.ruta}/me`)
       .pipe(tap(() => this.logout()));
