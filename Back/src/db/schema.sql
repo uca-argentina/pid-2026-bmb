@@ -239,3 +239,21 @@ $$;
 ALTER TABLE reserva
   ADD COLUMN IF NOT EXISTS ingreso_real TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS egreso_real  TIMESTAMPTZ;
+
+-- La ubicacion de la cochera se escribe en lenguaje natural ("Primer piso"),
+-- asi que 20 caracteres quedaron cortos.
+ALTER TABLE cochera
+  ALTER COLUMN sector TYPE VARCHAR(40);
+
+-- Foto del estacionamiento: una sola, subida por el propietario. Vive en la
+-- base y no en disco porque el filesystem del PaaS es efimero. El limite de
+-- tamano (2 MB) lo aplica la capa HTTP, no la base.
+CREATE TABLE IF NOT EXISTS estacionamiento_foto (
+  id_estacionamiento UUID        PRIMARY KEY,
+  mime               VARCHAR(30) NOT NULL,
+  bytes              BYTEA       NOT NULL,
+  actualizada        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT estacionamiento_foto_fk
+    FOREIGN KEY (id_estacionamiento) REFERENCES estacionamiento (id_estacionamiento)
+    ON DELETE CASCADE
+);

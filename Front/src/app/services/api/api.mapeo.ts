@@ -7,18 +7,18 @@ import {
   FranjaDisponible,
   NuevaCochera,
   NuevaReserva,
+  NuevoLoteCocheras,
   NuevoEstacionamiento,
   CambiosVehiculo,
   NuevoVehiculo,
   RegistroUsuario,
   ReservaDetallada,
-  SesionAuth,
   TipoVehiculo,
   Usuario,
   Vehiculo,
 } from '@app/models';
 import { aInstante, DIAS_POR_NUMERO, partesLocales } from '@app/utils/fecha.util';
-import { CocheraDto, EstacionamientoDto, EstadoReservaDto, FranjaDto, HorarioDto, ReservaDto, SesionDto, UsuarioDto, VehiculoDto } from './api.dto';
+import { CocheraDto, EstacionamientoDto, EstadoReservaDto, FranjaDto, HorarioDto, ReservaDto, UsuarioDto, VehiculoDto } from './api.dto';
 
 /*
  * Traduccion entre la API (snake_case, ids de catalogo, instantes ISO) y los
@@ -52,10 +52,6 @@ export function aUsuario(dto: UsuarioDto): Usuario {
     fechaAlta: dto.created_at,
     activo: dto.activo,
   };
-}
-
-export function aSesion(dto: SesionDto): SesionAuth {
-  return { token: dto.token, usuario: aUsuario(dto.usuario) };
 }
 
 export function aPayloadRegistro(datos: RegistroUsuario) {
@@ -97,9 +93,21 @@ export function aEstacionamiento(dto: EstacionamientoDto): Estacionamiento {
     cocherasDisponibles: dto.cocheras_libres ?? 0,
     tiposAdmitidos: (dto.tipos_vehiculo ?? []).map((id) => TIPO_POR_ID[id]),
     cubierto: dto.cubierto,
+    fotoUrl: urlDeFoto(dto),
     publicado: dto.publicado,
     activo: dto.activo,
   };
+}
+
+/**
+ * La foto se pide a la API, pero un `<img src>` no pasa por los interceptores,
+ * asi que la URL lleva el prefijo `/api` escrito. El `?v=` la hace cambiar
+ * cuando el propietario sube una nueva, para saltear el cache del navegador.
+ */
+function urlDeFoto(dto: EstacionamientoDto): string | null {
+  if (!dto.foto_actualizada) return null;
+  const version = Date.parse(dto.foto_actualizada);
+  return `/api/estacionamientos/${dto.id_estacionamiento}/foto?v=${version}`;
 }
 
 export function aPayloadEstacionamiento(datos: NuevoEstacionamiento) {
@@ -159,6 +167,15 @@ export function aPayloadCochera(datos: NuevaCochera) {
     sector: datos.sector || undefined,
     cubierta: datos.cubierta,
     estado_actual: datos.estado,
+  };
+}
+
+export function aPayloadLoteCochera(datos: NuevoLoteCocheras) {
+  return {
+    cantidad: datos.cantidad,
+    sector: datos.sector,
+    id_tipo_vehiculo: ID_TIPO_VEHICULO[datos.tipoVehiculo],
+    cubierta: datos.cubierta,
   };
 }
 

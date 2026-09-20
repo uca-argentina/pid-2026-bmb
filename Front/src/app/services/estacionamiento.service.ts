@@ -74,6 +74,21 @@ export class EstacionamientoService {
       .delete<{ estacionamiento: EstacionamientoDto }>(`${this.ruta}/${id}`)
       .pipe(map(({ estacionamiento }) => aEstacionamiento(estacionamiento)));
   }
+
+  /**
+   * `PUT /api/estacionamientos/:id/foto`
+   *
+   * El body es el archivo crudo: `HttpClient` manda el `File` tal cual y usa su
+   * `type` como Content-Type, que es lo que espera el `express.raw()` de la API.
+   */
+  subirFoto(id: Id, archivo: File): Observable<void> {
+    return this.http.put<void>(`${this.ruta}/${id}/foto`, archivo);
+  }
+
+  /** `DELETE /api/estacionamientos/:id/foto` */
+  borrarFoto(id: Id): Observable<void> {
+    return this.http.delete<void>(`${this.ruta}/${id}/foto`);
+  }
 }
 
 /* --------------------------- helpers de filtrado --------------------------- */

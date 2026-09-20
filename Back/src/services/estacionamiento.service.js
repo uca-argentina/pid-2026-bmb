@@ -48,7 +48,10 @@ const AGREGADOS = `
             'hora_cierre', to_char(h.hora_cierre, 'HH24:MI')
           ) ORDER BY h.dia_semana), '[]'::json)
      FROM horario h
-    WHERE h.id_estacionamiento = e.id_estacionamiento) AS horarios
+    WHERE h.id_estacionamiento = e.id_estacionamiento) AS horarios,
+  (SELECT f.actualizada
+     FROM estacionamiento_foto f
+    WHERE f.id_estacionamiento = e.id_estacionamiento) AS foto_actualizada
 `;
 
 /** Crea el estacionamiento y sus horarios en una sola transaccion. */

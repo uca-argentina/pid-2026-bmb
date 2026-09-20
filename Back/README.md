@@ -164,26 +164,36 @@ Estas decisiones vale la pena revisarlas con el equipo:
      (`calle`, `numero`, `ciudad`, `provincia`, `codigo_postal`). La columna
      `direccion` se sigue guardando, armada como `calle numero`, porque la usa
      la busqueda por texto.
-   - `cochera`: `sector` y `cubierta`.
+   - `cochera`: `sector` (ubicacion en lenguaje natural, ej. "Primer piso") y
+     `cubierta`.
    - `vehiculo`: `color` y `predeterminado` (como mucho uno por conductor,
      garantizado con un indice unico parcial).
+9. **Foto del estacionamiento.** No estaba en el ER. Vive en su propia tabla,
+   `estacionamiento_foto` (`id_estacionamiento`, `mime`, `bytes`, `actualizada`),
+   y no en un archivo en disco: el backend corre en un PaaS con filesystem
+   efimero, asi que los bytes se guardan en la misma base ya respaldada. La
+   sirve `GET /:id/foto`, publica y sin cache-busting propio (lo pone el
+   front con `?v=`).
 
 ---
 
 ## Endpoints
 
-Autenticacion: `Authorization: Bearer <token>`.
+Autenticacion: cookie httpOnly `parkit_token` (la pone el backend en
+`/auth/login`, `/register`, etc.; el cliente nunca la lee ni la manda a mano,
+el browser la manda solo en cada request a `/api`).
 
 ### Auth
 
 | Metodo | Ruta                 | Acceso   | Descripcion                          |
 | ------ | -------------------- | -------- | ------------------------------------ |
 | POST   | `/api/auth/register` | publico  | Alta con rol CONDUCTOR o PROPIETARIO |
-| POST   | `/api/auth/login`    | publico  | Devuelve usuario + JWT               |
-| GET    | `/api/auth/me`       | token    | Perfil del usuario autenticado       |
-| PATCH  | `/api/auth/me`       | token    | Edita datos, contrasena y perfiles habilitados |
-| DELETE | `/api/auth/me`       | token    | Baja de la cuenta (logica)           |
-| POST   | `/api/auth/rol`      | token    | Cambia el perfil activo y devuelve un token nuevo |
+| POST   | `/api/auth/login`    | publico  | Devuelve el usuario y deja la cookie de sesion |
+| POST   | `/api/auth/logout`   | publico  | Borra la cookie de sesion            |
+| GET    | `/api/auth/me`       | cookie   | Perfil del usuario autenticado       |
+| PATCH  | `/api/auth/me`       | cookie   | Edita datos, contrasena y perfiles habilitados |
+| DELETE | `/api/auth/me`       | cookie   | Baja de la cuenta (logica)           |
+| POST   | `/api/auth/rol`      | cookie   | Cambia el perfil activo y renueva la cookie |
 
 El usuario tiene un perfil activo (`rol`) y la lista de los que puede usar
 (`roles`). Al registrarse queda habilitado solo el elegido; `POST /api/auth/rol`
@@ -193,7 +203,7 @@ falla con `403` si se pide uno que no esta en `roles`.
 // POST /api/auth/rol
 { "rol": "PROPIETARIO" }
 
-// PATCH /api/auth/me  (todo opcional; devuelve usuario + token nuevo)
+// PATCH /api/auth/me  (todo opcional; devuelve el usuario y renueva la cookie)
 { "nombre": "Ana", "telefono": "1155667788",
   "roles": ["CONDUCTOR", "PROPIETARIO"],
   "password": "nuevaClave123", "passwordActual": "secreto123" }
@@ -201,7 +211,7 @@ falla con `403` si se pide uno que no esta en `roles`.
 
 Para cambiar la contrasena hay que mandar tambien `passwordActual` (`401` si no
 coincide). Si se quita el perfil activo queda activo el primero de los que
-sigan habilitados, y por eso la respuesta trae un token nuevo.
+sigan habilitados, y por eso la respuesta renueva la cookie con el rol nuevo.
 
 `DELETE /api/auth/me` es una baja logica: cancela las reservas del usuario que
 todavia no pasaron (las que hizo y las que recibio en sus cocheras), desactiva
@@ -232,6 +242,9 @@ habilitado.
 | POST   | `/api/estacionamientos/:id/cocheras`             | PROPIETARIO | Alta de cochera (valida propiedad)       |
 | PATCH  | `/api/estacionamientos/:id/cocheras/:idCochera`  | PROPIETARIO | Modifica identificador, tipo o estado    |
 | DELETE | `/api/estacionamientos/:id/cocheras/:idCochera`  | PROPIETARIO | Baja logica (`activo = false`)           |
+| GET    | `/api/estacionamientos/:id/foto`                 | publico     | La foto subida (404 si no tiene)         |
+| PUT    | `/api/estacionamientos/:id/foto`                 | PROPIETARIO | Sube o reemplaza la foto (JPG/PNG/WEBP, hasta 2 MB) |
+| DELETE | `/api/estacionamientos/:id/foto`                 | PROPIETARIO | Quita la foto                            |
 
 Filtros de busqueda: `q` (nombre, direccion, barrio o descripcion), `zona`,
 `id_tipo_vehiculo`, `tarifa_max`, `cubierto` (`true`/`false`), `limit`
@@ -254,11 +267,17 @@ Los listados y el detalle traen tambien `cocheras_activas`, `cocheras_libres`
 { "tarifa_hora": 1800, "publicado": false }
 
 // POST /api/estacionamientos/:id/cocheras
-{ "identificador": "A-01", "id_tipo_vehiculo": 1, "sector": "A", "cubierta": true,
+// El front solo pide un numero ("1", "2"...); la API sigue aceptando texto
+// libre de hasta 20 caracteres para no invalidar los datos ya cargados.
+{ "identificador": "1", "id_tipo_vehiculo": 1, "sector": "Primer piso", "cubierta": true,
   "estado_actual": "LIBRE" }
 
 // PATCH /api/estacionamientos/:id/cocheras/:idCochera  (al menos un campo)
 { "estado_actual": "OCUPADA" }
+
+// PUT /api/estacionamientos/:id/foto
+// Body binario, no JSON: el archivo tal cual, con su Content-Type
+// (image/jpeg, image/png o image/webp), hasta 2 MB.
 
 // GET /api/estacionamientos/:id/disponibilidad?fecha=2026-09-15&id_tipo_vehiculo=1
 { "fecha": "2026-09-15",

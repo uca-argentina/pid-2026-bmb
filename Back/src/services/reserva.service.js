@@ -7,6 +7,7 @@ import {
   sumarDias,
 } from '../utils/horario.js';
 import { ESTADOS_COCHERA, ESTADOS_RESERVA, ESTADOS_VIGENTES } from '../utils/roles.js';
+import { ORDEN_NATURAL } from './cochera.service.js';
 import { asegurarPropiedad } from './estacionamiento.service.js';
 
 const VIOLACION_EXCLUSION = '23P01';
@@ -241,7 +242,7 @@ async function asignarCochera(client, idEstacionamiento, vehiculo, inicio, fin) 
        FROM cochera c
       WHERE c.id_cochera = ANY($1::uuid[])
         AND ${sinSolapamiento('$2', '$3', '$4')}
-      ORDER BY c.identificador
+      ORDER BY ${ORDEN_NATURAL}
       LIMIT 1`,
     [candidatas.map((c) => c.id_cochera), ESTADOS_VIGENTES, inicio, fin],
   );

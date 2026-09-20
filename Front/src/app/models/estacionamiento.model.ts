@@ -46,6 +46,8 @@ export interface Estacionamiento {
   cocherasDisponibles: number;
   tiposAdmitidos: TipoVehiculo[];
   cubierto: boolean;
+  /** URL publica de la foto que subio el propietario, o `null` si no cargo ninguna. */
+  fotoUrl: string | null;
   /** Distancia al usuario en km. Solo viene en busquedas geolocalizadas. */
   distanciaKm?: number;
   publicado: boolean;

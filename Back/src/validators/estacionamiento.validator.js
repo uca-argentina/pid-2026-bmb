@@ -142,7 +142,21 @@ export function validarCochera(body) {
   return campos(body)
     .texto('identificador', body.identificador, { min: 1, max: 20 })
     .entero('id_tipo_vehiculo', body.id_tipo_vehiculo, { min: 1 })
-    .texto('sector', body.sector, { requerido: false, max: 20 })
+    .texto('sector', body.sector, { requerido: false, max: 40 })
+    .booleano('cubierta', body.cubierta, { requerido: false, default: false })
+    .enumerado('estado_actual', body.estado_actual, Object.values(ESTADOS_COCHERA), {
+      requerido: false,
+      default: ESTADOS_COCHERA.LIBRE,
+    })
+    .resultado();
+}
+
+/** Alta en lote: `sector` es obligatorio porque es lo que distingue un lote de otro. */
+export function validarLoteCochera(body) {
+  return campos(body)
+    .entero('cantidad', body.cantidad, { min: 2, max: 200 })
+    .texto('sector', body.sector, { max: 40 })
+    .entero('id_tipo_vehiculo', body.id_tipo_vehiculo, { min: 1 })
     .booleano('cubierta', body.cubierta, { requerido: false, default: false })
     .enumerado('estado_actual', body.estado_actual, Object.values(ESTADOS_COCHERA), {
       requerido: false,
@@ -156,7 +170,7 @@ export function validarActualizacionCochera(body) {
   return campos(body)
     .texto('identificador', body.identificador, { requerido: false, min: 1, max: 20 })
     .entero('id_tipo_vehiculo', body.id_tipo_vehiculo, { requerido: false, min: 1 })
-    .texto('sector', body.sector, { requerido: false, max: 20 })
+    .texto('sector', body.sector, { requerido: false, max: 40 })
     .booleano('cubierta', body.cubierta, { requerido: false })
     .enumerado('estado_actual', body.estado_actual, Object.values(ESTADOS_COCHERA), {
       requerido: false,

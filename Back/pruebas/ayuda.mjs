@@ -37,19 +37,30 @@ export async function cerrarApi() {
   await pool.end();
 }
 
-/** Devuelve `{ estado, datos }`; nunca lanza por un 4xx. */
-export async function api(metodo, ruta, { token, body } = {}) {
+/**
+ * Devuelve `{ estado, datos }`; nunca lanza por un 4xx.
+ *
+ * `body` se manda como JSON, salvo que venga `raw`: un Buffer que se manda tal
+ * cual, con el `contentType` indicado (asi se prueba la subida de fotos, que
+ * la API espera como body binario y no como JSON).
+ *
+ * La sesion viaja en la cookie httpOnly que pone `/auth/login` (ver
+ * `middlewares/auth.js`), asi que `token` aca es el par `nombre=valor` de esa
+ * cookie (lo que devuelve `cookieDeSesion`), no el JWT crudo.
+ */
+export async function api(metodo, ruta, { token, body, raw, contentType } = {}) {
   const respuesta = await fetch(`${base}${ruta}`, {
     method: metodo,
     headers: {
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(raw ? { 'Content-Type': contentType } : body ? { 'Content-Type': 'application/json' } : {}),
+      ...(token ? { Cookie: token } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: raw ?? (body ? JSON.stringify(body) : undefined),
   });
 
-  const texto = await respuesta.text();
-  let datos = null;
+  const binario = (respuesta.headers.get('content-type') ?? '').startsWith('image/');
+  const texto = binario ? null : await respuesta.text();
+  let datos = binario ? Buffer.from(await respuesta.arrayBuffer()) : null;
   if (texto) {
     try {
       datos = JSON.parse(texto);
@@ -58,7 +69,13 @@ export async function api(metodo, ruta, { token, body } = {}) {
     }
   }
 
-  return { estado: respuesta.status, datos };
+  return { estado: respuesta.status, datos, headers: respuesta.headers };
+}
+
+/** El par `nombre=valor` de la cookie de sesion que puso una respuesta de `/auth`. */
+export function cookieDeSesion(respuesta) {
+  const crudo = respuesta.headers.getSetCookie?.()[0] ?? respuesta.headers.get('set-cookie');
+  return crudo ? crudo.split(';')[0] : null;
 }
 
 /** El mensaje de error de una respuesta, para afirmar sobre el motivo. */
@@ -75,20 +92,20 @@ export async function crearUsuario({ rol = 'CONDUCTOR', roles } = {}) {
     body: { nombre: 'Prueba', apellido: 'Parkit', email, password: PASSWORD, rol },
   });
 
-  const usuario = { id: alta.datos.usuario.id_usuario, email, token: alta.datos.token };
+  const usuario = { id: alta.datos.usuario.id_usuario, email, token: cookieDeSesion(alta) };
 
   if (roles) {
     const cambio = await api('PATCH', '/auth/me', { token: usuario.token, body: { roles } });
-    usuario.token = cambio.datos.token;
+    usuario.token = cookieDeSesion(cambio);
   }
 
   return usuario;
 }
 
-/** Cambia el perfil activo y devuelve el token nuevo. */
+/** Cambia el perfil activo y devuelve la cookie de sesion nueva. */
 export async function cambiarRol(token, rol) {
-  const { datos } = await api('POST', '/auth/rol', { token, body: { rol } });
-  return datos.token;
+  const respuesta = await api('POST', '/auth/rol', { token, body: { rol } });
+  return cookieDeSesion(respuesta);
 }
 
 /** Estacionamiento publicado, abierto toda la semana, con `cocheras` cocheras. */

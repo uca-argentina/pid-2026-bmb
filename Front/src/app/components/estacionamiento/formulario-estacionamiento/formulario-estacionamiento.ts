@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -8,6 +16,7 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Boton, Tarjeta } from '@app/components/ui';
+import { FotoEstacionamiento } from '../foto-estacionamiento/foto-estacionamiento';
 import { DiaSemana, Estacionamiento, NuevoEstacionamiento } from '@app/models';
 
 const DIAS: { dia: DiaSemana; etiqueta: string }[] = [
@@ -37,7 +46,7 @@ function horarioValido(grupo: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-formulario-estacionamiento',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, Boton, Tarjeta],
+  imports: [ReactiveFormsModule, RouterLink, Boton, FotoEstacionamiento, Tarjeta],
   templateUrl: './formulario-estacionamiento.html',
 })
 export class FormularioEstacionamiento {
@@ -50,8 +59,23 @@ export class FormularioEstacionamiento {
   readonly textoEnviar = input('Guardar');
 
   readonly guardar = output<NuevoEstacionamiento>();
+  /**
+   * Se emite junto con `guardar`, en el mismo `enviar()`, solo si el
+   * propietario toco la foto: `null` para sacarla, o el archivo elegido.
+   * Va aparte porque subirla es un request distinto (multipart/binario) y
+   * porque en el alta recien se puede mandar despues del POST, cuando el
+   * estacionamiento ya tiene id.
+   */
+  readonly fotoElegida = output<File | null>();
 
   protected readonly dias = DIAS;
+
+  /**
+   * `undefined` = no se toco la foto, `null` = se pidio quitarla, `File` = se
+   * elige una nueva. Quien usa el formulario decide como subirla: necesita el
+   * id del estacionamiento, que en el alta recien existe despues de crearlo.
+   */
+  protected readonly archivoFoto = signal<File | null | undefined>(undefined);
 
   /** Mismos limites que valida el backend (estacionamiento.validator.js). */
   protected readonly formulario = this.fb.nonNullable.group({
@@ -120,6 +144,10 @@ export class FormularioEstacionamiento {
     });
   }
 
+  protected elegirFoto(archivo: File | null): void {
+    this.archivoFoto.set(archivo);
+  }
+
   protected invalido(campo: string): boolean {
     const control = this.formulario.get(campo);
     return Boolean(control?.invalid && control.touched);
@@ -132,6 +160,9 @@ export class FormularioEstacionamiento {
     }
 
     const valores = this.formulario.getRawValue();
+    const foto = this.archivoFoto();
+    if (foto !== undefined) this.fotoElegida.emit(foto);
+
     this.guardar.emit({
       nombre: valores.nombre.trim(),
       descripcion: valores.descripcion.trim(),

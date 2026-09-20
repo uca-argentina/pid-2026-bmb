@@ -26,11 +26,6 @@ export interface UsuarioDto {
   created_at: string;
 }
 
-export interface SesionDto {
-  usuario: UsuarioDto;
-  token: string;
-}
-
 export interface HorarioDto {
   /** 0 = domingo. */
   dia_semana: number;
@@ -76,6 +71,8 @@ export interface EstacionamientoDto {
   cocheras_libres?: number;
   tipos_vehiculo?: number[];
   horarios?: HorarioDto[];
+  /** Cuando se subio la foto. `null` o ausente si el estacionamiento no tiene. */
+  foto_actualizada?: string | null;
 }
 
 export interface VehiculoDto {

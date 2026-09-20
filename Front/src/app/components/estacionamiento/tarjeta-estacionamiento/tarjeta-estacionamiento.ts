@@ -6,7 +6,7 @@ import {
   textoDisponibilidad,
   tonoDisponibilidad,
 } from '@app/utils/disponibilidad.util';
-import { Boton, PuntoEstado, Tarjeta } from '@app/components/ui';
+import { Boton, Miniatura, PuntoEstado, Tarjeta } from '@app/components/ui';
 
 /**
  * Ficha de estacionamiento del listado.
@@ -16,7 +16,7 @@ import { Boton, PuntoEstado, Tarjeta } from '@app/components/ui';
 @Component({
   selector: 'app-tarjeta-estacionamiento',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Tarjeta, Boton, PuntoEstado],
+  imports: [Tarjeta, Boton, Miniatura, PuntoEstado],
   templateUrl: './tarjeta-estacionamiento.html',
   host: { class: 'block' },
 })
