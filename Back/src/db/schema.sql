@@ -304,3 +304,7 @@ UPDATE reserva r
   JOIN estacionamiento e ON e.id_estacionamiento = c.id_estacionamiento
  WHERE c.id_cochera = r.id_cochera
    AND r.precio_total IS NULL;
+
+-- Desde que el servicio guarda el precio al crear la reserva, siempre esta cargado.
+-- El UPDATE de arriba rellena las filas que quedaran en NULL antes de este paso.
+ALTER TABLE reserva ALTER COLUMN precio_total SET NOT NULL;
