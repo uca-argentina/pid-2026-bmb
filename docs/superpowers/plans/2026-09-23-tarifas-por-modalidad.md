@@ -482,9 +482,9 @@ UPDATE reserva r
   JOIN estacionamiento e ON e.id_estacionamiento = c.id_estacionamiento
  WHERE c.id_cochera = r.id_cochera
    AND r.precio_total IS NULL;
-
-ALTER TABLE reserva ALTER COLUMN precio_total SET NOT NULL;
 ```
+
+> `precio_total` queda nullable en esta task: el servicio de reservas todavia no lo inserta (lo hace la Task 3, que agrega el `SET NOT NULL`). Si se lo exigiera ahora, crear reservas fallaria hasta la Task 3.
 
 - [ ] **Step 5: Validador**
 
@@ -639,7 +639,7 @@ cd Back
 export DATABASE_URL=postgresql://localhost:5432/parkit_test DATABASE_SSL=false
 npm run db:migrate && npm run db:migrate && npm test
 ```
-Expected: la migración se aplica **dos veces** sin error (idempotente) y todas las pruebas pasan, incluidas las 6 nuevas. La prueba vieja `precio_total 2000` de `reserva.test.mjs` también pasa (todavía usa la fórmula de `SELECT_DETALLE`).
+Expected: la migración se aplica **dos veces** sin error (idempotente) y todas las pruebas pasan, incluidas las 6 nuevas. La prueba vieja `precio_total 2000` de `reserva.test.mjs` también pasa (todavía usa la fórmula de `SELECT_DETALLE`, y las reservas nuevas quedan con `precio_total` en NULL hasta la Task 3).
 
 - [ ] **Step 8: Commit**
 
@@ -653,6 +653,7 @@ git commit -m "Permito ofrecer tarifas por hora, estadia y jornada en el estacio
 ### Task 3: Reservas por modalidad con precio guardado (backend)
 
 **Files:**
+- Modify: `Back/src/db/schema.sql` (agrega `SET NOT NULL` a `precio_total`)
 - Modify: `Back/src/validators/reserva.validator.js`
 - Modify: `Back/src/services/reserva.service.js`
 - Test: `Back/pruebas/reserva.test.mjs`
@@ -968,15 +969,23 @@ async function validarHorario(client, idEstacionamiento, inicio, fin, modalidad)
 }
 ```
 
-- [ ] **Step 5: Correr las pruebas y verificar que pasan**
+- [ ] **Step 5: Exigir el precio guardado y correr las pruebas**
 
-Run: `cd Back && npm test` (variables de la base local)
+Ahora que el servicio siempre inserta `precio_total`, agregar al final de `Back/src/db/schema.sql`:
+
+```sql
+
+-- Desde que el servicio guarda el precio al crear la reserva, siempre esta cargado.
+-- El UPDATE de arriba rellena las filas que quedaran en NULL antes de este paso.
+ALTER TABLE reserva ALTER COLUMN precio_total SET NOT NULL;
+```
+Correr `npm run db:migrate` **dos veces** (idempotente) y luego `npm test` (variables de la base local).
 Expected: PASS — toda la suite, incluidas las 9 de `modalidades de tarifa` y `tarifas.test.mjs`. Verificar que no queda ninguna referencia a `e.tarifa_hora` en `reserva.service.js`: `grep -n "tarifa_hora" src/services/reserva.service.js` no debe devolver nada.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add Back/src/validators/reserva.validator.js Back/src/services/reserva.service.js Back/pruebas/reserva.test.mjs
+git add Back/src/db/schema.sql Back/src/validators/reserva.validator.js Back/src/services/reserva.service.js Back/pruebas/reserva.test.mjs
 git commit -m "Reservo por modalidad y guardo el precio al crear la reserva"
 ```
 
