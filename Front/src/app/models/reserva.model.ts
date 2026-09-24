@@ -55,13 +55,15 @@ export interface ReservaDetallada extends Reserva {
   cochera: Pick<Cochera, 'id' | 'identificador' | 'sector'> | null;
 }
 
-/** Datos que junta el flujo de reserva: vehiculo, fecha y franja horaria. */
+/** Datos que junta el flujo de reserva: vehiculo, modalidad, fecha y hora. */
 export interface NuevaReserva {
   estacionamientoId: Id;
   vehiculoId: Id;
+  modalidad: ModalidadReserva;
   fecha: FechaISO;
   horaDesde: HoraHHmm;
-  horaHasta: HoraHHmm;
+  /** Solo por hora; estadia y jornada terminan solas (12 h / 24 h despues). */
+  horaHasta: HoraHHmm | null;
 }
 
 /** Query de `GET /api/estacionamientos/:id/disponibilidad`. */
@@ -83,6 +85,7 @@ export interface FranjaDisponible {
 export interface BorradorReserva {
   estacionamientoId: Id | null;
   vehiculoId: Id | null;
+  modalidad: ModalidadReserva;
   fecha: FechaISO | null;
   horaDesde: HoraHHmm | null;
   horaHasta: HoraHHmm | null;
@@ -91,6 +94,7 @@ export interface BorradorReserva {
 export const BORRADOR_VACIO: BorradorReserva = {
   estacionamientoId: null,
   vehiculoId: null,
+  modalidad: 'HORA',
   fecha: null,
   horaDesde: null,
   horaHasta: null,

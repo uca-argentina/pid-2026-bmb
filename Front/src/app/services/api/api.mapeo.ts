@@ -3,8 +3,10 @@ import {
   Estacionamiento,
   EstadoCochera,
   EstadoReserva,
+  FechaHoraISO,
   FranjaAtencion,
   FranjaDisponible,
+  HORAS_POR_MODALIDAD,
   NuevaCochera,
   NuevaReserva,
   NuevoLoteCocheras,
@@ -279,12 +281,21 @@ export function aReserva(dto: ReservaDto): ReservaDetallada {
 
 /** El backend asigna la cochera: se reserva por estacionamiento. */
 export function aPayloadReserva(datos: NuevaReserva) {
+  const inicio = aInstante(datos.fecha, datos.horaDesde);
   return {
     id_estacionamiento: datos.estacionamientoId,
     id_vehiculo: datos.vehiculoId,
-    inicio: aInstante(datos.fecha, datos.horaDesde),
-    fin: aInstante(datos.fecha, datos.horaHasta),
+    modalidad: datos.modalidad,
+    inicio,
+    fin: finDeReserva(datos, inicio),
   };
+}
+
+/** Por hora el fin lo elige el conductor; estadia y jornada duran un bloque fijo desde el ingreso. */
+function finDeReserva(datos: NuevaReserva, inicio: FechaHoraISO): FechaHoraISO {
+  if (datos.modalidad === 'HORA') return aInstante(datos.fecha, datos.horaHasta ?? datos.horaDesde);
+  const horas = HORAS_POR_MODALIDAD[datos.modalidad];
+  return new Date(Date.parse(inicio) + horas * 3_600_000).toISOString();
 }
 
 export function aFranja(dto: FranjaDto): FranjaDisponible {

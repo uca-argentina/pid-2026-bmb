@@ -9,12 +9,12 @@ import {
   SelectorFranja,
   SelectorVehiculo,
 } from '@app/components/reserva';
-import { Boton, Cargando, EstadoVacio, Tarjeta } from '@app/components/ui';
-import { FranjaDisponible, Id, Reserva, Vehiculo } from '@app/models';
+import { Boton, Cargando, Chip, EstadoVacio, Tarjeta } from '@app/components/ui';
+import { ETIQUETA_MODALIDAD, FranjaDisponible, Id, ModalidadReserva, Reserva, Vehiculo } from '@app/models';
 import { EstacionamientoService } from '@app/services/estacionamiento.service';
 import { ReservaService } from '@app/services/reserva.service';
 import { VehiculoService } from '@app/services/vehiculo.service';
-import { resumenTarifas } from '@app/utils/tarifa.util';
+import { modalidadesOfrecidas, resumenTarifas } from '@app/utils/tarifa.util';
 import { formatearDistancia } from '@app/utils/disponibilidad.util';
 import { aFechaISO, desdeFechaISO } from '@app/utils/fecha.util';
 
@@ -37,6 +37,7 @@ import { aFechaISO, desdeFechaISO } from '@app/utils/fecha.util';
     Tarjeta,
     Boton,
     Cargando,
+    Chip,
     EstadoVacio,
   ],
   templateUrl: './reservar.html',
@@ -51,6 +52,7 @@ export class Reservar {
   readonly estacionamientoId = input.required<Id>();
 
   protected readonly desdeFechaISO = desdeFechaISO;
+  protected readonly etiquetaModalidad = ETIQUETA_MODALIDAD;
   protected readonly borrador = this.reservas.borrador;
   protected readonly horas = this.reservas.duracionHoras;
   protected readonly completo = this.reservas.borradorCompleto;
@@ -73,12 +75,18 @@ export class Reservar {
     () => this.recursoVehiculos.value().find((v) => v.id === this.borrador().vehiculoId) ?? null,
   );
 
+  /** Solo las modalidades para las que el propietario cargo tarifa. */
+  protected readonly modalidades = computed(() => {
+    const estacionamiento = this.recursoEstacionamiento.value();
+    return estacionamiento ? modalidadesOfrecidas(estacionamiento.tarifas) : [];
+  });
+
   /** Las franjas dependen del tipo de vehiculo: se piden con fecha y vehiculo elegidos. */
   protected readonly recursoDisponibilidad = rxResource({
     params: () => {
-      const fecha = this.borrador().fecha;
+      const { fecha, modalidad } = this.borrador();
       const tipoVehiculo = this.vehiculoElegido()?.tipo;
-      return fecha && tipoVehiculo
+      return modalidad === 'HORA' && fecha && tipoVehiculo
         ? { estacionamientoId: this.estacionamientoId(), fecha, tipoVehiculo }
         : undefined;
     },
@@ -88,10 +96,10 @@ export class Reservar {
 
   protected readonly total = computed(() => {
     const estacionamiento = this.recursoEstacionamiento.value();
-    return estacionamiento ? this.reservas.precioEstimado(estacionamiento.tarifas.hora ?? 0) : 0;
+    return estacionamiento ? this.reservas.precioEstimado(estacionamiento.tarifas) : 0;
   });
 
-  /** "Av. Belgrano 1240 · $ 900 por hora" */
+  /** "Av. Belgrano 1240 · 1,2 km · $ 900 por hora": direccion, distancia y resumen de tarifas. */
   protected readonly contexto = computed(() => {
     const estacionamiento = this.recursoEstacionamiento.value();
     if (!estacionamiento) return '';
@@ -114,7 +122,7 @@ export class Reservar {
     // La primera franja libre del dia queda propuesta, como en el diseno.
     effect(() => {
       const franjas = this.recursoDisponibilidad.value();
-      if (franjas.length === 0 || this.borrador().horaDesde) return;
+      if (franjas.length === 0 || this.borrador().horaDesde || this.borrador().modalidad !== 'HORA') return;
       const disponible = franjas.find((f) => f.disponible);
       if (disponible) {
         this.reservas.actualizarBorrador({
@@ -131,6 +139,14 @@ export class Reservar {
       const predeterminado = vehiculos.find((v) => v.predeterminado) ?? vehiculos[0];
       this.reservas.actualizarBorrador({ vehiculoId: predeterminado.id });
     });
+
+    // Si la modalidad elegida no la ofrece este estacionamiento, se pasa a la primera que si.
+    effect(() => {
+      const ofrecidas = this.modalidades();
+      if (ofrecidas.length > 0 && !ofrecidas.includes(this.borrador().modalidad)) {
+        this.reservas.actualizarBorrador({ modalidad: ofrecidas[0], horaDesde: null, horaHasta: null });
+      }
+    });
   }
 
   /** Cambiar de vehiculo cambia las franjas disponibles: se vuelve a proponer una. */
@@ -140,6 +156,16 @@ export class Reservar {
 
   protected elegirFecha(fecha: string | null): void {
     this.reservas.actualizarBorrador({ fecha, horaDesde: null, horaHasta: null });
+  }
+
+  protected elegirModalidad(modalidad: ModalidadReserva): void {
+    this.reservas.actualizarBorrador({ modalidad, horaDesde: null, horaHasta: null });
+  }
+
+  /** Estadia y jornada: el conductor elige solo la hora de ingreso. */
+  protected elegirIngreso(evento: Event): void {
+    const hora = (evento.target as HTMLInputElement).value;
+    this.reservas.actualizarBorrador({ horaDesde: hora || null, horaHasta: null });
   }
 
   protected elegirRango(rango: RangoHorario): void {
