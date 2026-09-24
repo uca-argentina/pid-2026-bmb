@@ -330,3 +330,87 @@ describe('foto del estacionamiento', () => {
     assert.equal(borrada.estado, 403);
   });
 });
+
+describe('tarifas por modalidad', () => {
+  const rutaDe = (estacionamiento) => `/estacionamientos/${estacionamiento.id_estacionamiento}`;
+
+  test('se puede ofrecer solo estadia y jornada', async () => {
+    const propietario = await nuevoPropietario();
+    const estacionamiento = await crearEstacionamiento(propietario.token, {
+      tarifas: { tarifa_estadia: 5000, tarifa_jornada: 8000 },
+    });
+
+    assert.equal(estacionamiento.tarifa_hora, null);
+    assert.equal(estacionamiento.tarifa_estadia, 5000);
+    assert.equal(estacionamiento.tarifa_jornada, 8000);
+  });
+
+  test('crear sin ninguna tarifa devuelve 400', async () => {
+    const propietario = await nuevoPropietario();
+    const { estado, datos } = await api('POST', '/estacionamientos', {
+      token: propietario.token,
+      body: {
+        nombre: 'Sin tarifas',
+        calle: 'Av. Prueba',
+        numero: '1',
+        ciudad: 'CABA',
+        provincia: 'Buenos Aires',
+      },
+    });
+
+    assert.equal(estado, 400);
+    assert.match(JSON.stringify(datos), /tarifa_hora/);
+  });
+
+  test('una tarifa en 0 es valida (gratis)', async () => {
+    const propietario = await nuevoPropietario();
+    const estacionamiento = await crearEstacionamiento(propietario.token, {
+      tarifas: { tarifa_hora: 0 },
+    });
+
+    assert.equal(estacionamiento.tarifa_hora, 0);
+  });
+
+  test('una tarifa negativa devuelve 400', async () => {
+    const propietario = await nuevoPropietario();
+    const estacionamiento = await crearEstacionamiento(propietario.token);
+
+    const { estado } = await api('PATCH', rutaDe(estacionamiento), {
+      token: propietario.token,
+      body: { tarifa_jornada: -1 },
+    });
+    assert.equal(estado, 400);
+  });
+
+  test('PATCH con null borra una modalidad y conserva las demas', async () => {
+    const propietario = await nuevoPropietario();
+    const estacionamiento = await crearEstacionamiento(propietario.token, {
+      tarifas: { tarifa_hora: 1000, tarifa_estadia: 5000 },
+    });
+
+    const { estado, datos } = await api('PATCH', rutaDe(estacionamiento), {
+      token: propietario.token,
+      body: { tarifa_estadia: null },
+    });
+
+    assert.equal(estado, 200);
+    assert.equal(datos.estacionamiento.tarifa_estadia, null);
+    assert.equal(datos.estacionamiento.tarifa_hora, 1000);
+  });
+
+  test('PATCH que dejaria al estacionamiento sin tarifas devuelve 400 y no cambia nada', async () => {
+    const propietario = await nuevoPropietario();
+    const estacionamiento = await crearEstacionamiento(propietario.token, {
+      tarifas: { tarifa_hora: 1000 },
+    });
+
+    const { estado } = await api('PATCH', rutaDe(estacionamiento), {
+      token: propietario.token,
+      body: { tarifa_hora: null },
+    });
+    assert.equal(estado, 400);
+
+    const actual = await api('GET', rutaDe(estacionamiento), { token: propietario.token });
+    assert.equal(actual.datos.estacionamiento.tarifa_hora, 1000);
+  });
+});

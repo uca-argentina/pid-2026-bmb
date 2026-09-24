@@ -257,3 +257,50 @@ CREATE TABLE IF NOT EXISTS estacionamiento_foto (
     FOREIGN KEY (id_estacionamiento) REFERENCES estacionamiento (id_estacionamiento)
     ON DELETE CASCADE
 );
+
+-- Tarifas por modalidad: hora, estadia (12 h) y jornada (24 h). Cada una es
+-- opcional (NULL = no la ofrece) pero tiene que haber al menos una. El precio
+-- de cada reserva se guarda al crearla, para que cambiar la tarifa despues no
+-- altere reservas ya hechas.
+ALTER TABLE estacionamiento
+  ALTER COLUMN tarifa_hora DROP NOT NULL,
+  ALTER COLUMN tarifa_hora DROP DEFAULT,
+  ADD COLUMN IF NOT EXISTS tarifa_estadia DECIMAL(10, 2),
+  ADD COLUMN IF NOT EXISTS tarifa_jornada DECIMAL(10, 2);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'estacionamiento_alguna_tarifa'
+  ) THEN
+    ALTER TABLE estacionamiento
+      ADD CONSTRAINT estacionamiento_tarifa_estadia_no_negativa
+        CHECK (tarifa_estadia IS NULL OR tarifa_estadia >= 0),
+      ADD CONSTRAINT estacionamiento_tarifa_jornada_no_negativa
+        CHECK (tarifa_jornada IS NULL OR tarifa_jornada >= 0),
+      ADD CONSTRAINT estacionamiento_alguna_tarifa
+        CHECK (tarifa_hora IS NOT NULL OR tarifa_estadia IS NOT NULL OR tarifa_jornada IS NOT NULL);
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'modalidad_reserva') THEN
+    CREATE TYPE modalidad_reserva AS ENUM ('HORA', 'ESTADIA', 'JORNADA');
+  END IF;
+END
+$$;
+
+ALTER TABLE reserva
+  ADD COLUMN IF NOT EXISTS modalidad    modalidad_reserva NOT NULL DEFAULT 'HORA',
+  ADD COLUMN IF NOT EXISTS precio_total DECIMAL(10, 2);
+
+-- Las reservas anteriores eran todas por hora: se les guarda el precio que
+-- daba la formula de entonces.
+UPDATE reserva r
+   SET precio_total = ROUND(EXTRACT(EPOCH FROM (r.fin - r.inicio)) / 3600 * e.tarifa_hora, 2)
+  FROM cochera c
+  JOIN estacionamiento e ON e.id_estacionamiento = c.id_estacionamiento
+ WHERE c.id_cochera = r.id_cochera
+   AND r.precio_total IS NULL;

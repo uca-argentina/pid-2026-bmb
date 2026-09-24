@@ -109,7 +109,10 @@ export async function cambiarRol(token, rol) {
 }
 
 /** Estacionamiento publicado, abierto toda la semana, con `cocheras` cocheras. */
-export async function crearEstacionamiento(token, { cocheras = 1, tipo = 1, horarios } = {}) {
+export async function crearEstacionamiento(
+  token,
+  { cocheras = 1, tipo = 1, horarios, tarifas = { tarifa_hora: 1000 } } = {},
+) {
   const alta = await api('POST', '/estacionamientos', {
     token,
     body: {
@@ -118,7 +121,7 @@ export async function crearEstacionamiento(token, { cocheras = 1, tipo = 1, hora
       numero: '100',
       ciudad: 'CABA',
       provincia: 'Buenos Aires',
-      tarifa_hora: 1000,
+      ...tarifas,
       publicado: true,
       horarios:
         horarios ??
