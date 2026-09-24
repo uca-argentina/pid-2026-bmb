@@ -27,14 +27,23 @@
         <label class="campo">
           <span class="label-campo">Por hora ($)</span>
           <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifaHora" placeholder="900" />
+          @if (invalido('tarifaHora')) {
+            <span class="campo-error">La tarifa no puede ser negativa.</span>
+          }
         </label>
         <label class="campo">
           <span class="label-campo">Estadía · 12 h ($)</span>
           <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifaEstadia" placeholder="5000" />
+          @if (invalido('tarifaEstadia')) {
+            <span class="campo-error">La tarifa no puede ser negativa.</span>
+          }
         </label>
         <label class="campo">
           <span class="label-campo">Jornada · 24 h ($)</span>
           <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifaJornada" placeholder="8000" />
+          @if (invalido('tarifaJornada')) {
+            <span class="campo-error">La tarifa no puede ser negativa.</span>
+          }
         </label>
       </div>
       <p class="text-[12px] text-plomo">
