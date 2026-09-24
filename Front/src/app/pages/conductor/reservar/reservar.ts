@@ -14,6 +14,7 @@ import { FranjaDisponible, Id, Reserva, Vehiculo } from '@app/models';
 import { EstacionamientoService } from '@app/services/estacionamiento.service';
 import { ReservaService } from '@app/services/reserva.service';
 import { VehiculoService } from '@app/services/vehiculo.service';
+import { resumenTarifas } from '@app/utils/tarifa.util';
 import { formatearDistancia } from '@app/utils/disponibilidad.util';
 import { aFechaISO, desdeFechaISO } from '@app/utils/fecha.util';
 
@@ -87,17 +88,17 @@ export class Reservar {
 
   protected readonly total = computed(() => {
     const estacionamiento = this.recursoEstacionamiento.value();
-    return estacionamiento ? this.reservas.precioEstimado(estacionamiento.precioPorHora) : 0;
+    return estacionamiento ? this.reservas.precioEstimado(estacionamiento.tarifas.hora ?? 0) : 0;
   });
 
   /** "Av. Belgrano 1240 · $ 900 por hora" */
   protected readonly contexto = computed(() => {
     const estacionamiento = this.recursoEstacionamiento.value();
     if (!estacionamiento) return '';
-    const { direccion, precioPorHora, distanciaKm } = estacionamiento;
+    const { direccion, tarifas, distanciaKm } = estacionamiento;
     const distancia = formatearDistancia(distanciaKm);
     const base = `${direccion.calle} ${direccion.numero}`.trim();
-    return `${base}${distancia ? ` · ${distancia}` : ''} · $ ${precioPorHora.toLocaleString('es-AR')} por hora`;
+    return `${base}${distancia ? ` · ${distancia}` : ''} · ${resumenTarifas(tarifas)}`;
   });
 
   constructor() {

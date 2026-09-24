@@ -23,20 +23,31 @@
         <input type="text" formControlName="descripcion" placeholder="Cubierta, con acceso por Av. Belgrano" />
       </label>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label class="campo">
-          <span class="label-campo">Tarifa por hora ($)</span>
-          <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifa" placeholder="900" />
-          @if (invalido('tarifa')) {
-            <span class="campo-error">Ingresá la tarifa.</span>
-          }
+          <span class="label-campo">Por hora ($)</span>
+          <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifaHora" placeholder="900" />
         </label>
-
-        <label class="flex items-center gap-2.5 self-end pb-3 text-[13px] text-grafito">
-          <input class="size-4 shrink-0 accent-acento" type="checkbox" formControlName="cubierto" />
-          Es cubierto
+        <label class="campo">
+          <span class="label-campo">Estadía · 12 h ($)</span>
+          <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifaEstadia" placeholder="5000" />
+        </label>
+        <label class="campo">
+          <span class="label-campo">Jornada · 24 h ($)</span>
+          <input class="num-tabular" type="number" min="0" step="50" formControlName="tarifaJornada" placeholder="8000" />
         </label>
       </div>
+      <p class="text-[12px] text-plomo">
+        Dejá vacía la modalidad que no ofrezcas. Tenés que ofrecer al menos una.
+      </p>
+      @if (formulario.hasError('sinTarifa') && formulario.touched) {
+        <span class="campo-error">Ingresá al menos una tarifa.</span>
+      }
+
+      <label class="flex items-center gap-2.5 text-[13px] text-grafito">
+        <input class="size-4 shrink-0 accent-acento" type="checkbox" formControlName="cubierto" />
+        Es cubierto
+      </label>
     </fieldset>
   </ui-tarjeta>
 

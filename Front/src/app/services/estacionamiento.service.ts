@@ -99,7 +99,8 @@ const distancia = (estacionamiento: Estacionamiento) =>
 const COMPARADORES: Record<OrdenEstacionamiento, (a: Estacionamiento, b: Estacionamiento) => number> =
   {
     DISTANCIA: (a, b) => distancia(a) - distancia(b),
-    PRECIO: (a, b) => a.precioPorHora - b.precioPorHora,
+    PRECIO: (a, b) =>
+      (a.tarifas.hora ?? Number.MAX_VALUE) - (b.tarifas.hora ?? Number.MAX_VALUE),
   };
 
 /** Lo que la API no resuelve: solo con lugar libre, y el orden elegido. */

@@ -6,6 +6,7 @@ import {
   textoDisponibilidad,
   tonoDisponibilidad,
 } from '@app/utils/disponibilidad.util';
+import { resumenTarifas } from '@app/utils/tarifa.util';
 import { Boton, Miniatura, PuntoEstado, Tarjeta } from '@app/components/ui';
 
 /**
@@ -38,7 +39,6 @@ export class TarjetaEstacionamiento {
     return distancia ? `${base} · ${distancia}` : base;
   });
 
-  protected readonly tarifa = computed(() =>
-    this.estacionamiento().precioPorHora.toLocaleString('es-AR'),
-  );
+  /** "$900/h · $5.000 estadía (12 h) · $8.000 jornada (24 h)" */
+  protected readonly tarifas = computed(() => resumenTarifas(this.estacionamiento().tarifas));
 }
