@@ -15,6 +15,7 @@
       @if (reserva().modalidad !== 'HORA') {
         · {{ etiquetaModalidad[reserva().modalidad] }}
       }
+      · $ {{ reserva().precioTotal.toLocaleString('es-AR') }}
     </p>
   </div>
 

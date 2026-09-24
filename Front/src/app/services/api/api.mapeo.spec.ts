@@ -54,6 +54,7 @@ describe('aPayloadReserva', () => {
     } as NuevaReserva);
 
     expect(payload.modalidad).toBe('ESTADIA');
+    expect(payload.fin).toBe('2026-09-15T09:00:00.000Z');
     expect(horas(payload)).toBe(12);
   });
 
@@ -61,6 +62,7 @@ describe('aPayloadReserva', () => {
     const payload = aPayloadReserva({ ...base, modalidad: 'JORNADA', horaHasta: null } as NuevaReserva);
 
     expect(payload.modalidad).toBe('JORNADA');
+    expect(payload.fin).toBe('2026-09-15T11:00:00.000Z');
     expect(horas(payload)).toBe(24);
   });
 });
