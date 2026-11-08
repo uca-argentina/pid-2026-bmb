@@ -1,14 +1,14 @@
-// Estacionamientos: alta (verificando la direccion), busqueda publica con filtros,
+// Estacionamientos: alta, busqueda publica con filtros,
 // detalle, edicion (vuelve a revision si cambia nombre o direccion) y baja.
 import { query, withTransaction } from '../config/database.js';
 import { ApiError } from '../utils/ApiError.js';
 import { armarSet } from '../utils/sql.js';
 import { ZONA_HORARIA } from '../utils/horario.js';
 import { sinSolapamiento } from '../utils/solapamiento.js';
-import { CAMPOS_TARIFA } from '../utils/tarifas.js';
+import { CAMPOS_TARIFA, HORAS_POR_MODALIDAD } from '../utils/tarifas.js';
 import { ESTADOS_APROBACION, ESTADOS_COCHERA, ESTADOS_VIGENTES } from '../utils/roles.js';
+import { cancelarPorBajaDeEstacionamientos as cancelarAbonos } from './abono.service.js';
 import { listarPorEstacionamiento as listarCocheras } from './cochera.service.js';
-import { geocodificar } from './geocodificacion.service.js';
 import {
   COLUMNAS_REPUTACION,
   DIAS_BUSQUEDA,
@@ -24,23 +24,6 @@ const reputacionPublica = () => lateralReputacion(`now() - interval '${DIAS_BUSQ
 const CAMPOS_DIRECCION = ['calle', 'numero', 'ciudad', 'provincia'];
 // Si cambia alguno de estos en uno aprobado, vuelve a la cola de revision.
 const CAMPOS_REVISION = ['nombre', ...CAMPOS_DIRECCION];
-/** Si los datos ya traen latitud y longitud. */
-const tieneCoordenadas = (datos) => datos.latitud != null && datos.longitud != null;
-
-const DIRECCION_INEXISTENTE =
-  'No encontramos esa direccion. Elegi provincia, ciudad y calle de la lista y revisa la altura.';
-
-/**
- * Verifica la direccion contra Georef y devuelve sus coordenadas. Lanza 400 si
- * Georef responde que no existe. Si no se pudo consultar, deja pasar sin
- * coordenadas: una caida del servicio no tiene que impedir cargar el estacionamiento.
- */
-async function verificarDireccion(direccion) {
-  const resultado = await geocodificar(direccion);
-  if (resultado?.encontrada === false) throw ApiError.badRequest(DIRECCION_INEXISTENTE);
-  return { latitud: resultado?.latitud ?? null, longitud: resultado?.longitud ?? null };
-}
-
 const COLUMNAS = [
   'id_estacionamiento', 'id_propietario', 'nombre', 'descripcion', 'direccion',
   'calle', 'numero', 'ciudad', 'provincia', 'codigo_postal', 'barrio_zona',
@@ -127,13 +110,8 @@ function abiertoEntre(inicio, fin) {
 
 /**
  * Crea el estacionamiento y sus horarios en una sola transaccion.
- * Antes verifica la direccion y obtiene sus coordenadas (fuera de la
- * transaccion, para no tener una conexion tomada mientras se espera a Georef).
  */
-export async function crear(idPropietario, entrada) {
-  const coordenadas = await verificarDireccion(entrada);
-  const datos = tieneCoordenadas(entrada) ? entrada : { ...entrada, ...coordenadas };
-
+export async function crear(idPropietario, datos) {
   return withTransaction(async (client) => {
     const { rows } = await client.query(
       `INSERT INTO estacionamiento
@@ -219,14 +197,19 @@ export async function buscar(filtros) {
     condiciones.push(`e.barrio_zona ILIKE $${parametros.length}`);
   }
 
+  // El filtro de precio es por hora. Sin tarifa por hora, cuenta lo que sale
+  // la hora en su estadia (12 h) o su jornada (24 h).
+  const precioHora = `COALESCE(e.tarifa_hora, e.tarifa_estadia / ${HORAS_POR_MODALIDAD.ESTADIA},
+                               e.tarifa_jornada / ${HORAS_POR_MODALIDAD.JORNADA})`;
+
   if (filtros.tarifa_min !== undefined) {
     parametros.push(filtros.tarifa_min);
-    condiciones.push(`e.tarifa_hora >= $${parametros.length}`);
+    condiciones.push(`${precioHora} >= $${parametros.length}`);
   }
 
   if (filtros.tarifa_max !== undefined) {
     parametros.push(filtros.tarifa_max);
-    condiciones.push(`e.tarifa_hora <= $${parametros.length}`);
+    condiciones.push(`${precioHora} <= $${parametros.length}`);
   }
 
   if (filtros.destacados) condiciones.push(ES_DESTACADO);
@@ -347,7 +330,10 @@ export async function obtenerPorId(idEstacionamiento, { idSolicitante = null, es
 export function aceptaReservas(fila, { conAbono = false } = {}) {
   // Un abono ya pagado se sigue usando aunque el estacionamiento haya vuelto a
   // revision por un cambio de nombre o direccion: lo que no se vende es nuevo.
-  const aprobado = conAbono || fila.estado_aprobacion === ESTADOS_APROBACION.APROBADO;
+  // Si el administrador lo rechazo, tampoco se usa el abono.
+  const aprobado =
+    fila.estado_aprobacion === ESTADOS_APROBACION.APROBADO ||
+    (conAbono && fila.estado_aprobacion === ESTADOS_APROBACION.PENDIENTE);
   return fila.activo && fila.publicado && aprobado;
 }
 
@@ -405,49 +391,6 @@ async function asegurarAlgunaTarifa(client, idEstacionamiento, datos) {
 }
 
 /**
- * Decide las coordenadas que se guardan en un PATCH. El formulario del
- * propietario manda siempre la direccion completa y las coordenadas que tenia,
- * por eso se compara contra lo guardado:
- *   - si cambio la direccion, se verifica (400 si no existe) y se toman las
- *     coordenadas nuevas, salvo que el cliente mande otras explicitamente;
- *   - si no cambio pero el estacionamiento no tiene coordenadas, se intenta
- *     completarlas. No se rechaza: puede ser una direccion cargada antes de
- *     que existiera la validacion, y no tiene que trabar editar otros datos.
- */
-async function completarCoordenadas(idEstacionamiento, entrada) {
-  const { rows } = await query(
-    `SELECT ${[...CAMPOS_DIRECCION, 'latitud', 'longitud'].join(', ')}
-       FROM estacionamiento WHERE id_estacionamiento = $1`,
-    [idEstacionamiento],
-  );
-  const guardado = rows[0];
-
-  const direccion = { ...guardado };
-  for (const campo of CAMPOS_DIRECCION) {
-    if (entrada[campo] !== undefined) direccion[campo] = entrada[campo];
-  }
-
-  const coordenadasNuevas =
-    tieneCoordenadas(entrada) &&
-    (entrada.latitud !== guardado.latitud || entrada.longitud !== guardado.longitud);
-  const cambioDireccion = CAMPOS_DIRECCION.some(
-    (campo) => (direccion[campo] ?? '') !== (guardado[campo] ?? ''),
-  );
-
-  if (cambioDireccion) {
-    const coordenadas = await verificarDireccion(direccion);
-    return coordenadasNuevas ? entrada : { ...entrada, ...coordenadas };
-  }
-
-  if (coordenadasNuevas || tieneCoordenadas(guardado)) return entrada;
-
-  const resultado = await geocodificar(direccion);
-  return resultado?.latitud != null
-    ? { ...entrada, latitud: resultado.latitud, longitud: resultado.longitud }
-    : entrada;
-}
-
-/**
  * Si cambiaron el nombre o la direccion (lo que verifica el administrador) y en
  * que estado de aprobacion estaba. Un aprobado con cambios vuelve a PENDIENTE: El formulario manda siempre todos los
  * campos, asi que se compara contra lo guardado (fila ya bloqueada por
@@ -475,7 +418,8 @@ export async function reenviarRevision(idEstacionamiento, idPropietario) {
 
   const { rows } = await query(
     `UPDATE estacionamiento
-        SET estado_aprobacion = '${ESTADOS_APROBACION.PENDIENTE}', motivo_rechazo = NULL, enviado_en = now()
+        SET estado_aprobacion = '${ESTADOS_APROBACION.PENDIENTE}', motivo_rechazo = NULL, enviado_en = now(),
+            revisado_por = NULL, revisado_en = NULL
       WHERE id_estacionamiento = $1
         AND estado_aprobacion = '${ESTADOS_APROBACION.RECHAZADO}'
         AND activo
@@ -491,11 +435,10 @@ export async function reenviarRevision(idEstacionamiento, idPropietario) {
  * Modifica los datos del estacionamiento. Si vienen `horarios` reemplazan a los
  * cargados: es lo que espera la pantalla, que manda la semana completa.
  */
-export async function actualizar(idEstacionamiento, idPropietario, entrada) {
+export async function actualizar(idEstacionamiento, idPropietario, datos) {
   const { activo } = await asegurarPropiedad(idEstacionamiento, idPropietario);
   if (!activo) throw ApiError.conflict('El estacionamiento esta dado de baja');
 
-  const datos = await completarCoordenadas(idEstacionamiento, entrada);
 
   await withTransaction(async (client) => {
     await asegurarAlgunaTarifa(client, idEstacionamiento, datos);
@@ -560,28 +503,54 @@ export async function darDeBaja(idEstacionamiento, idPropietario) {
 
     if (!rows[0].activo) throw ApiError.conflict('El estacionamiento ya esta dado de baja');
 
-    await client.query(
-      `UPDATE reserva r SET estado = 'CANCELADA', cancelada_por = 'PROPIETARIO'
-         FROM cochera c
-        WHERE c.id_cochera = r.id_cochera
-          AND c.id_estacionamiento = $1
-          AND r.estado = ANY($2::estado_reserva[])
-          AND r.fin > now()`,
-      [idEstacionamiento, ESTADOS_VIGENTES],
-    );
-
-    await client.query(
-      'UPDATE cochera SET activo = FALSE, estado_actual = $1 WHERE id_estacionamiento = $2',
-      [ESTADOS_COCHERA.INACTIVA, idEstacionamiento],
-    );
+    await darDeBajaEnTransaccion(client, [idEstacionamiento]);
 
     const { rows: actualizado } = await client.query(
-      `UPDATE estacionamiento SET activo = FALSE, publicado = FALSE
-        WHERE id_estacionamiento = $1
-        RETURNING ${CAMPOS}`,
+      `SELECT ${CAMPOS} FROM estacionamiento WHERE id_estacionamiento = $1`,
       [idEstacionamiento],
     );
-
     return actualizado[0];
   });
 }
+
+/**
+ * La baja de uno o varios estacionamientos, dentro de una transaccion (la usan
+ * darDeBaja y la baja de la cuenta). Con un vehiculo adentro (reserva ACTIVA,
+ * aunque se haya excedido) se rechaza: primero tiene que registrarse su egreso.
+ * Las reservas que todavia no empezaron se cancelan, los abonos vigentes se
+ * cancelan con la devolucion de lo no usado, y se desactiva todo.
+ */
+export async function darDeBajaEnTransaccion(client, idsEstacionamientos) {
+  if (idsEstacionamientos.length === 0) return;
+
+  const { rows: adentro } = await client.query(
+    `SELECT 1 FROM reserva r JOIN cochera c ON c.id_cochera = r.id_cochera
+      WHERE c.id_estacionamiento = ANY($1::uuid[]) AND r.estado = 'ACTIVA' LIMIT 1`,
+    [idsEstacionamientos],
+  );
+  if (adentro[0]) throw ApiError.conflict(MENSAJE_VEHICULO_ADENTRO);
+
+  await client.query(
+    `UPDATE reserva r SET estado = 'CANCELADA', cancelada_por = 'PROPIETARIO'
+       FROM cochera c
+      WHERE c.id_cochera = r.id_cochera
+        AND c.id_estacionamiento = ANY($1::uuid[])
+        AND r.estado IN ('PENDIENTE', 'CONFIRMADA')
+        AND r.fin > now()`,
+    [idsEstacionamientos],
+  );
+
+  await cancelarAbonos(client, idsEstacionamientos);
+
+  await client.query(
+    'UPDATE cochera SET activo = FALSE, estado_actual = $1 WHERE id_estacionamiento = ANY($2::uuid[])',
+    [ESTADOS_COCHERA.INACTIVA, idsEstacionamientos],
+  );
+  await client.query(
+    'UPDATE estacionamiento SET activo = FALSE, publicado = FALSE WHERE id_estacionamiento = ANY($1::uuid[])',
+    [idsEstacionamientos],
+  );
+}
+
+export const MENSAJE_VEHICULO_ADENTRO =
+  'Hay un vehiculo adentro: registra su egreso antes de dar de baja';

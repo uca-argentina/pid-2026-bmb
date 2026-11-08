@@ -30,6 +30,30 @@ async function reservar(propietario, conductor, estacionamiento, cuando = franja
   return datos.reserva;
 }
 
+/**
+ * Reserva de `dueno` (como conductor) en su propio estacionamiento. La API no la
+ * deja crear (409), asi que la arma otro conductor y despues se le pasa al dueno
+ * por SQL: la defensa de calificar igual tiene que rechazarla.
+ */
+async function reservaEnLoPropio(dueno, comoConductor, comoPropietario, estacionamiento) {
+  const vehiculo = await crearVehiculo(comoConductor.token);
+  const propia = await api('POST', '/reservas', {
+    token: comoConductor.token,
+    body: { id_estacionamiento: estacionamiento.id_estacionamiento, id_vehiculo: vehiculo.id_vehiculo, ...franja() },
+  });
+  assert.equal(propia.estado, 409);
+
+  const otro = await crearUsuario();
+  const reserva = await reservar(comoPropietario, otro, estacionamiento);
+  await marcarUsada(reserva.id_reserva);
+  await query('UPDATE reserva SET id_conductor = $1, id_vehiculo = $2 WHERE id_reserva = $3', [
+    dueno.id,
+    vehiculo.id_vehiculo,
+    reserva.id_reserva,
+  ]);
+  return reserva;
+}
+
 /** Deja la reserva usada (entro y salio) sin pasar por el QR. */
 function marcarUsada(idReserva, { egresoHace = '1 hour' } = {}) {
   return query(
@@ -137,8 +161,7 @@ describe('el propietario califica al conductor', () => {
     const estacionamiento = await crearEstacionamiento(dueno.token, { cocheras: 1 });
     const comoConductor = { token: await cambiarRol(dueno.token, 'CONDUCTOR') };
     const comoPropietario = { token: await cambiarRol(comoConductor.token, 'PROPIETARIO') };
-    const reserva = await reservar(comoPropietario, comoConductor, estacionamiento);
-    await marcarUsada(reserva.id_reserva);
+    const reserva = await reservaEnLoPropio(dueno, comoConductor, comoPropietario, estacionamiento);
 
     const respuesta = await calificarConductor(comoPropietario, reserva.id_reserva, { puntaje: 5 });
     assert.equal(respuesta.estado, 403);

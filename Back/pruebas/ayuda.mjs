@@ -19,15 +19,6 @@ import { pool, query } from '../src/config/database.js';
 
 export { query };
 
-// Las pruebas no geocodifican: no dependen de la red ni del cupo de Nominatim.
-process.env.GEOCODING_ENABLED = 'false';
-// Ni a Cloudinary: se prueba la logica propia (carpetas, firma), no su API.
-process.env.CLOUDINARY_ENABLED = 'false';
-// Sin credenciales (p. ej. en CI) se firma con unas de prueba: la firma es local.
-process.env.CLOUDINARY_CLOUD_NAME ||= 'nube-de-prueba';
-process.env.CLOUDINARY_API_KEY ||= '000000000000000';
-process.env.CLOUDINARY_API_SECRET ||= 'secreto-de-prueba';
-
 /** Contrasena de todos los usuarios de prueba. */
 export const PASSWORD = 'prueba1234';
 
@@ -250,10 +241,13 @@ async function borrarDatosDePrueba() {
   const usuarios = 'SELECT id_usuario FROM usuario WHERE email LIKE $1';
   const propios = `SELECT id_estacionamiento FROM estacionamiento WHERE id_propietario IN (${usuarios})`;
 
-  // Las devoluciones no se borran en cascada (RESTRICT): van primero.
+  // Las devoluciones no se borran en cascada (RESTRICT): van primero. Las de
+  // una baja no tienen incidencia: se encuentran por su abono.
   await query(
     `DELETE FROM devolucion
-      WHERE id_incidencia IN (SELECT id_incidencia FROM incidencia WHERE id_estacionamiento IN (${propios}))`,
+      WHERE id_incidencia IN (SELECT id_incidencia FROM incidencia WHERE id_estacionamiento IN (${propios}))
+         OR id_abono IN (SELECT id_abono FROM abono
+                          WHERE id_conductor IN (${usuarios}) OR id_estacionamiento IN (${propios}))`,
     [deLaSuite],
   );
   await query(

@@ -316,8 +316,8 @@ describe('denuncia de reseñas', () => {
 describe('aPayloadCochera', () => {
   it('alta: todos los campos, con el id del tipo de vehiculo', () => {
     expect(
-      aPayloadCochera({ identificador: '7', tipoVehiculo: 'MOTO', sector: 'PB', cubierta: true, estado: 'LIBRE' }),
-    ).toEqual({ identificador: '7', id_tipo_vehiculo: 2, sector: 'PB', cubierta: true, estado_actual: 'LIBRE' });
+      aPayloadCochera({ identificador: '7', tipoVehiculo: 'MOTO', sector: 'PB', cubierta: true }),
+    ).toEqual({ identificador: '7', id_tipo_vehiculo: 2, sector: 'PB', cubierta: true });
   });
 
   it('cambios: solo lo que vino; un sector vacio no se manda', () => {
@@ -326,7 +326,6 @@ describe('aPayloadCochera', () => {
       id_tipo_vehiculo: undefined,
       sector: undefined,
       cubierta: undefined,
-      estado_actual: undefined,
     });
   });
 });

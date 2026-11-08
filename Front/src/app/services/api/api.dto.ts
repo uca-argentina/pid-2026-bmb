@@ -183,7 +183,7 @@ export interface VehiculoDto {
   color: string | null;
   predeterminado: boolean;
   activo: boolean;
-  /** URL de la foto propia en Cloudinary, o `null`. */
+  /** URL de la foto propia (servida por la API), o `null`. */
   foto_url?: string | null;
   foto_miniatura_url?: string | null;
 }
@@ -280,6 +280,7 @@ export interface IncidenciaDto {
   denunciada_at: string | null;
   denunciada_por: 'PROPIETARIO' | 'CONDUCTOR' | null;
   resuelta_at: string | null;
+  retirada_at: string | null;
   id_reserva: string | null;
   inicio: string | null;
   fin: string | null;

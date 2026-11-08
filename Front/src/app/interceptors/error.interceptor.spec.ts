@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '@app/services/auth.service';
-import { errorInterceptor } from './error.interceptor';
+import { ErrorApi, errorInterceptor } from './error.interceptor';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
@@ -33,16 +33,13 @@ describe('errorInterceptor', () => {
     expect(logout).toHaveBeenCalled();
   });
 
-  it('un error de Cloudinary no cierra la sesion y muestra un mensaje propio', () => {
-    let mensaje = '';
-    const url = 'https://api.cloudinary.com/v1_1/demo/image/upload';
-    http.post(url, {}).subscribe({ error: (e: Error) => (mensaje = e.message) });
-    backend.expectOne(url).flush({ error: { message: 'Invalid Signature abc. String to sign - x' } }, {
-      status: 401,
-      statusText: 'x',
-    });
+  it('un error de la API conserva los details', () => {
+    let detalles: unknown = null;
+    http.post('/api/x', {}).subscribe({ error: (e: ErrorApi) => (detalles = e.detalles) });
+    backend
+      .expectOne('/api/x')
+      .flush({ error: { message: 'No', details: { reservas_sin_alternativa: ['r1'] } } }, { status: 409, statusText: 'x' });
 
-    expect(logout).not.toHaveBeenCalled();
-    expect(mensaje).toBe('No pudimos subir la foto. Probá de nuevo en un rato.');
+    expect(detalles).toEqual({ reservas_sin_alternativa: ['r1'] });
   });
 });

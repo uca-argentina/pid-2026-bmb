@@ -5,7 +5,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { armarSet } from '../utils/sql.js';
 import { ESTADOS_COCHERA, ESTADOS_RESERVA, ESTADOS_VIGENTES } from '../utils/roles.js';
 import { cocheraReservable, finEfectivo, sinSolapamiento } from '../utils/solapamiento.js';
-import { asegurarPropiedad } from './estacionamiento.service.js';
+import { MENSAJE_VEHICULO_ADENTRO, asegurarPropiedad } from './estacionamiento.service.js';
 
 const VIOLACION_UNIQUE = '23505';
 const VIOLACION_FK = '23503';
@@ -17,7 +17,9 @@ const CAMPOS =
   'id_cochera, id_estacionamiento, id_tipo_vehiculo, identificador, sector, cubierta, estado_actual, ' +
   'activo, bloqueada, motivo_bloqueo, bloqueada_hasta';
 
-const CAMPOS_EDITABLES = ['identificador', 'id_tipo_vehiculo', 'sector', 'cubierta', 'estado_actual'];
+// `estado_actual` no: lo escribe solo el ciclo de la reserva (ingreso y egreso),
+// y la baja y el bloqueo tienen sus propios caminos.
+const CAMPOS_EDITABLES = ['identificador', 'id_tipo_vehiculo', 'sector', 'cubierta'];
 
 /**
  * `identificador` es texto, asi que ordenarlo tal cual pone la cochera 10 antes
@@ -57,7 +59,7 @@ export async function crear(idEstacionamiento, idPropietario, datos) {
         datos.identificador,
         datos.sector ?? null,
         datos.cubierta ?? false,
-        datos.estado_actual,
+        ESTADOS_COCHERA.LIBRE,
       ],
     );
     return rows[0];
@@ -139,7 +141,7 @@ export async function listarPorEstacionamiento(idEstacionamiento) {
   return rows;
 }
 
-/** Modifica identificador, tipo de vehiculo, sector, cubierta y/o estado de una cochera propia. */
+/** Modifica identificador, tipo de vehiculo, sector y/o cubierta de una cochera propia. */
 export async function actualizar(idEstacionamiento, idPropietario, idCochera, datos) {
   await asegurarPropiedad(idEstacionamiento, idPropietario);
 
@@ -183,10 +185,17 @@ export async function darDeBaja(idEstacionamiento, idPropietario, idCochera) {
     if (!existentes[0]) throw ApiError.notFound('La cochera no existe en este estacionamiento');
     if (!existentes[0].activo) throw ApiError.conflict('La cochera ya esta dada de baja');
 
+    // Con el auto adentro (aunque se haya excedido) no se da de baja, igual que bloquear().
+    const { rows: adentro } = await client.query(
+      `SELECT 1 FROM reserva WHERE id_cochera = $1 AND estado = $2 LIMIT 1`,
+      [idCochera, ESTADOS_RESERVA.ACTIVA],
+    );
+    if (adentro[0]) throw ApiError.conflict(MENSAJE_VEHICULO_ADENTRO);
+
     await client.query(
       `UPDATE reserva SET estado = 'CANCELADA', cancelada_por = 'PROPIETARIO'
-        WHERE id_cochera = $1 AND estado = ANY($2::estado_reserva[]) AND fin > now()`,
-      [idCochera, ESTADOS_VIGENTES],
+        WHERE id_cochera = $1 AND estado IN ('PENDIENTE', 'CONFIRMADA') AND fin > now()`,
+      [idCochera],
     );
 
     const { rows } = await client.query(
@@ -255,9 +264,9 @@ export async function buscarCocheraLibre(client, { idEstacionamiento, idTipoVehi
   return { candidatas: candidatas.length, libre: libres[0] ?? null };
 }
 
-const AVISO_REASIGNADA =
+export const AVISO_REASIGNADA =
   'Te reasignamos a otra cochera del mismo estacionamiento: la tuya entro en mantenimiento.';
-const AVISO_CANCELADA_SIN_ALTERNATIVA =
+export const AVISO_CANCELADA_SIN_ALTERNATIVA =
   'Cancelamos tu reserva: la cochera entro en mantenimiento y no habia otra disponible en tu horario.';
 
 /**
@@ -288,8 +297,10 @@ export async function bloquear(idEstacionamiento, idPropietario, idCochera, { mo
          FROM reserva r
          JOIN vehiculo v ON v.id_vehiculo = r.id_vehiculo
         WHERE r.id_cochera = $1 AND r.estado = ANY($2::estado_reserva[]) AND ${finEfectivo('r')} > now()
+          -- Con hasta, lo que empieza despues del bloqueo no se toca.
+          AND ($3::timestamptz IS NULL OR r.inicio < $3)
         FOR UPDATE OF r`,
-      [idCochera, ESTADOS_VIGENTES],
+      [idCochera, ESTADOS_VIGENTES, hasta ?? null],
     );
 
     if (afectadas.some((r) => r.estado === ESTADOS_RESERVA.ACTIVA)) {
@@ -359,7 +370,7 @@ export async function desbloquear(idEstacionamiento, idPropietario, idCochera) {
   return rows[0];
 }
 
-/** Cocheras con `bloqueada_hasta` ya vencido: las llama el job de vencimientos. */
+/** Cocheras con `bloqueada_hasta` ya vencido: las llama la revision de vencimientos (src/jobs/vencimientos.job.js). */
 export async function desbloquearVencidas() {
   const { rows } = await query(
     `UPDATE cochera SET bloqueada = FALSE, motivo_bloqueo = NULL, bloqueada_hasta = NULL

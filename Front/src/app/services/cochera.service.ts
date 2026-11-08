@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Cochera, EstadoCochera, Id, LoteCocheras, NuevaCochera } from '@app/models';
+import { Cochera, Id, LoteCocheras, NuevaCochera } from '@app/models';
 import { CocheraDto } from './api/api.dto';
 import { aCochera, aPayloadCochera, aPayloadLotes } from './api/api.mapeo';
 
@@ -17,13 +17,6 @@ export class CocheraService {
       .pipe(map(({ cocheras }) => cocheras.map(aCochera)));
   }
 
-  /** `POST /api/estacionamientos/:id/cocheras` */
-  crear(datos: NuevaCochera): Observable<Cochera> {
-    return this.http
-      .post<{ cochera: CocheraDto }>(rutaCocheras(datos.estacionamientoId), aPayloadCochera(datos))
-      .pipe(map((respuesta) => aCochera(respuesta.cochera)));
-  }
-
   /** `POST /api/estacionamientos/:id/cocheras/lote` (todo o nada) */
   crearLote(estacionamientoId: Id, lotes: LoteCocheras[]): Observable<Cochera[]> {
     return this.http
@@ -36,10 +29,6 @@ export class CocheraService {
     return this.http
       .patch<{ cochera: CocheraDto }>(rutaCochera(cochera), aPayloadCochera(cambios))
       .pipe(map((respuesta) => aCochera(respuesta.cochera)));
-  }
-
-  cambiarEstado(cochera: Cochera, estado: EstadoCochera): Observable<Cochera> {
-    return this.actualizar(cochera, { estado });
   }
 
   /** `POST /api/estacionamientos/:id/cocheras/:idCochera/reactivar` */

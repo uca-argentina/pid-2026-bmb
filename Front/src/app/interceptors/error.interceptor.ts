@@ -19,14 +19,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  // Las subidas van directo a Cloudinary (URL absoluta): sus errores no tienen
-  // que ver con la sesion de Parkit y su mensaje no es para mostrar tal cual.
-  if (/^https?:\/\//i.test(req.url)) {
-    return next(req).pipe(
-      catchError(() => throwError(() => new Error('No pudimos subir la foto. Probá de nuevo en un rato.'))),
-    );
-  }
-
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && auth.estaAutenticado()) {
@@ -34,10 +26,26 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         void router.navigate(['/ingresar']);
       }
 
-      return throwError(() => new Error(mensajeDe(error)));
+      return throwError(() => new ErrorApi(mensajeDe(error), error.status, detallesDe(error)));
     }),
   );
 };
+
+/** Error de la API de Parkit: ademas del mensaje, conserva el status y `details`. */
+export class ErrorApi extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly detalles: unknown,
+  ) {
+    super(message);
+  }
+}
+
+function detallesDe(error: HttpErrorResponse): unknown {
+  const cuerpo = error.error as RespuestaError | string | null;
+  return cuerpo && typeof cuerpo === 'object' && 'error' in cuerpo ? (cuerpo.error.details ?? null) : null;
+}
 
 /** El mensaje para mostrar: el del back ({ error: { message } }) o uno generico. */
 function mensajeDe(error: HttpErrorResponse): string {

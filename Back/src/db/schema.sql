@@ -568,7 +568,7 @@ CREATE TABLE IF NOT EXISTS incidencia (
     FOREIGN KEY (id_reserva) REFERENCES reserva (id_reserva) ON DELETE CASCADE,
   CONSTRAINT incidencia_estacionamiento_fk
     FOREIGN KEY (id_estacionamiento) REFERENCES estacionamiento (id_estacionamiento) ON DELETE CASCADE,
-  -- El job corre cada minuto: una sola incidencia de cada tipo por reserva.
+  -- La revision de vencimientos corre seguido: una sola incidencia de cada tipo por reserva.
   CONSTRAINT incidencia_una_por_tipo UNIQUE (id_reserva, tipo)
 );
 
@@ -779,7 +779,7 @@ BEGIN
 END
 $$;
 
--- La unica-por-tipo vale solo para las del sistema (el job); de reclamos puede
+-- La unica-por-tipo vale solo para las del sistema (la revision de vencimientos); de reclamos puede
 -- haber varios por reserva, pero uno solo abierto o denunciado a la vez.
 ALTER TABLE incidencia DROP CONSTRAINT IF EXISTS incidencia_una_por_tipo;
 CREATE UNIQUE INDEX IF NOT EXISTS incidencia_sistema_una_por_tipo
@@ -846,6 +846,22 @@ BEGIN
   END IF;
 END
 $$;
+
+-- Devoluciones sin incidencia: la baja de un estacionamiento (o de la cuenta del
+-- propietario) cancela sus abonos vigentes y devuelve la parte no usada, sin
+-- reclamo de por medio.
+ALTER TABLE devolucion ALTER COLUMN id_incidencia DROP NOT NULL;
+
+-- La patente es unica solo entre los vehiculos activos: despues de una baja se
+-- puede volver a registrar (el mismo conductor o un dueno nuevo).
+ALTER TABLE vehiculo DROP CONSTRAINT IF EXISTS vehiculo_patente_unica;
+CREATE UNIQUE INDEX IF NOT EXISTS vehiculo_patente_unica ON vehiculo (patente) WHERE activo;
+
+-- Un reclamo retirado no esta resuelto: la fecha va en su propia columna.
+-- `estado::text`: RETIRADA se agrega en esta misma transaccion (ver arriba).
+ALTER TABLE incidencia ADD COLUMN IF NOT EXISTS retirada_at TIMESTAMPTZ;
+UPDATE incidencia SET retirada_at = resuelta_at, resuelta_at = NULL
+ WHERE estado::text = 'RETIRADA' AND retirada_at IS NULL AND resuelta_at IS NOT NULL;
 
 -- Calificaciones (Sprint 3). Una por lado de cada reserva: el CONDUCTOR
 -- califica al estacionamiento y el PROPIETARIO al conductor (`autor`), con un
