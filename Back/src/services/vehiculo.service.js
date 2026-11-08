@@ -2,7 +2,7 @@
 import { query, withTransaction } from '../config/database.js';
 import { ApiError } from '../utils/ApiError.js';
 import { errorPatente } from '../validators/vehiculo.validator.js';
-import * as fotos from './fotos.service.js';
+import * as cloudinary from './cloudinary.service.js';
 
 const VIOLACION_UNIQUE = '23505';
 const VIOLACION_FK = '23503';
@@ -183,7 +183,7 @@ export async function darDeBaja(idVehiculo, idConductor) {
   if (vigentes[0]) {
     throw ApiError.conflict('El vehiculo tiene reservas vigentes: cancelalas antes de darlo de baja');
   }
-  // La foto no se va a volver a ver: se borra tambien del disco.
+  // La foto no se va a volver a ver: se saca tambien de Cloudinary.
   await cambiarFoto(idVehiculo, null);
 
   const { rows } = await query(
@@ -215,7 +215,7 @@ async function activoDelConductor(idVehiculo, idConductor) {
 /** Firma para que el navegador suba la foto del vehiculo a su carpeta. */
 export async function firmarFoto(idVehiculo, idConductor) {
   await activoDelConductor(idVehiculo, idConductor);
-  return fotos.firmarSubida(fotos.carpetaDe('vehiculos', idVehiculo));
+  return cloudinary.firmarSubida(cloudinary.carpetaDe('vehiculos', idVehiculo));
 }
 
 /**
@@ -232,7 +232,7 @@ async function cambiarFoto(idVehiculo, publicId) {
       [idVehiculo, publicId],
     );
     const { foto_anterior: anterior, ...vehiculo } = rows[0];
-    if (anterior !== publicId) await fotos.borrar(anterior);
+    if (anterior !== publicId) await cloudinary.borrar(anterior);
     return vehiculo;
   } catch (error) {
     if (error.code === VIOLACION_UNIQUE) throw ApiError.conflict('Esa foto ya esta cargada');
@@ -240,10 +240,10 @@ async function cambiarFoto(idVehiculo, publicId) {
   }
 }
 
-/** Pone (o reemplaza) la foto propia del vehiculo. La anterior se borra del disco. */
+/** Pone (o reemplaza) la foto propia del vehiculo. La anterior se borra de Cloudinary. */
 export async function guardarFoto(idVehiculo, idConductor, publicId) {
   await activoDelConductor(idVehiculo, idConductor);
-  await fotos.verificar(publicId, fotos.carpetaDe('vehiculos', idVehiculo));
+  await cloudinary.verificar(publicId, cloudinary.carpetaDe('vehiculos', idVehiculo));
   return cambiarFoto(idVehiculo, publicId);
 }
 
